@@ -18,6 +18,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import android.app.Activity;
+import android.content.Context;
 //import android.graphics.Bitmap;
 //import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -25,11 +26,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-@SuppressWarnings("ShowToast")
 public class Principal extends Activity {
 	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
 	private String capa, tmp;
-	private int ordem_trimestre, ano = 2012;
+	private int ordem_trimestre, ano = 2013;
 	private StringBuilder titulo = new StringBuilder();
 
 	@Override
@@ -52,12 +52,12 @@ public class Principal extends Activity {
 		Document doc = this.getDoc(ano);
 		// pegando do #conteudo por haver erro de sintaxe no html do #trimestre
 		Elements trimestres = this.getElements(doc,
-				"#conteudo p:matches([t|T]rimestre+)");
+				"#trimestres p:matches([t|T]rimestre+)");
 		Elements capas = this.getElements(doc, "#trimestres img");
 
 		for (int i = 0; i < trimestres.size(); i++) {
 			tmp = trimestres.get(i).text().replace('/', ' ');
-			// Log.d("trimestre", tmp);
+			Log.d("trimestre", tmp);
 			StringTokenizer tokens = new StringTokenizer(tmp);
 			// 1¤ Trimestre 2011 - A Bíblia e as emoções humanas
 			// pega apenas o primeiro char de 4¤ e converte para int
@@ -106,17 +106,17 @@ public class Principal extends Activity {
 	 */
 
 	public Document getDoc(int ano) {
+		String url = "http://www.cpb.com.br/htdocs/periodicos/lesjovens" + ano
+				+ ".html";
 		try {
 			// obtem o html do endereço
-			Document doc = Jsoup.connect(
-					"http://www.cpb.com.br" + "/htdocs/periodicos/les" + ano
-							+ ".html").get();
-			Log.d("Elementos", "Abrindo a página de índice dos trimestres");
+			Document doc = Jsoup.connect(url).get();
+			Log.d("Elementos", "Abrindo " + url);
 			// faz a selecao dos elementos desejados com base na query
 
 			return doc;
 		} catch (IOException e) {
-			Toast.makeText(this, "Erro:" + e.getMessage(), Toast.LENGTH_SHORT);
+			Toast.makeText(this, "Erro:" + e.getMessage(), Toast.LENGTH_SHORT).show();
 			return null;
 		}
 	}
@@ -151,9 +151,9 @@ public class Principal extends Activity {
 	}
 
 	class BaixaCapas extends AsyncTask<String, Integer, String> {
+		Context context = getApplicationContext();
 		private final static String TAG = "BaixaCapas";
-		private File diretorio = new File("/data/data/" + getPackageName()
-				+ "/imagens/");
+		private File diretorio = new File(context.getFilesDir() + "/imagens/");
 
 		@Override
 		protected String doInBackground(String... urls) {
