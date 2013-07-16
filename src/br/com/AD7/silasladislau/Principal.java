@@ -17,6 +17,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+
+import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
 import android.app.Activity;
 import android.content.Context;
 //import android.graphics.Bitmap;
@@ -49,7 +51,7 @@ public class Principal extends Activity {
 	 */
 	public void atualizaTrimestres(int ano) {
 		// obtem o html do endereço
-		Document doc = this.getDoc(ano);
+		Document doc = this.getHtml(ano);
 		// pegando do #conteudo por haver erro de sintaxe no html do #trimestre
 		Elements trimestres = this.getElements(doc,
 				"#trimestres p:matches([t|T]rimestre+)");
@@ -97,15 +99,9 @@ public class Principal extends Activity {
 			// limpa a variavel
 			capa = null;
 		}
-	}
+	}	
 
-	/*
-	 * public void carregaImagens(String endereco) { url = null; try { url = new
-	 * URL(endereco); } catch (MalformedURLException e) { e.printStackTrace(); }
-	 * new BaixaCapas().execute(url); }
-	 */
-
-	public Document getDoc(int ano) {
+	public Document getHtml(int ano) {		
 		String url = "http://www.cpb.com.br/htdocs/periodicos/lesjovens" + ano
 				+ ".html";
 		try {
@@ -133,7 +129,7 @@ public class Principal extends Activity {
 	 */
 	public int trimestreAtualNoSite(int ano) {
 		int trimestreAtual = 0;
-		Document doc = this.getDoc(ano);
+		Document doc = this.getHtml(ano);
 		Elements trimestres = this.getElements(doc,
 				"#conteudo p:matches([t|T]rimestre+)");
 		for (int i = 0; i < trimestres.size(); i++) {
@@ -149,12 +145,12 @@ public class Principal extends Activity {
 				"Trimestre Atual: " + String.valueOf(trimestreAtual));
 		return trimestreAtual;
 	}
-
+	
 	class BaixaCapas extends AsyncTask<String, Integer, String> {
 		Context context = getApplicationContext();
 		private final static String TAG = "BaixaCapas";
 		private File diretorio = new File(context.getFilesDir() + "/imagens/");
-
+				
 		@Override
 		protected String doInBackground(String... urls) {
 			criaDiretorioImagens(diretorio);
@@ -172,7 +168,7 @@ public class Principal extends Activity {
 					Log.i(TAG, "doInBackground: " + urls[0]);
 					// Cria a url
 					URL url = new URL(urls[0]);
-					//InputStream in = url.openStream();
+					// InputStream in = url.openStream();
 					try {
 						HttpResponse response = client.execute(getRequest);
 						// check 200 OK for success
@@ -200,104 +196,86 @@ public class Principal extends Activity {
 								Log.i(TAG, "imagem retornada com: " + bytes.length
 										+ " bytes");
 								// conexao.disconnect();
-								return "Imagem retornada com: " + bytes.length + " bytes";
+								return "Imagem retornada com: " + bytes.length
+										+ " bytes";
 								// decoding stream data back into image Bitmap
 								// that android understands
-								/*final Bitmap bitmap = BitmapFactory
-										.decodeStream(inputStream);
-
-								return bitmap;*/
-							} finally {								
+								/*
+								 * final Bitmap bitmap = BitmapFactory
+								 * .decodeStream(inputStream);
+								 * 
+								 * return bitmap;
+								 */
+							} finally {
 								entity.consumeContent();
 							}
 						}
 					} catch (Exception e) {
 						Log.e(getClass().getName(), e.getMessage(), e);
 					}
-					// HttpURLConnection conexao = (HttpURLConnection) url
-					// .openConnection();
-					// Configura a requisição para GET
-					/*
-					 * conexao.setRequestProperty("Request-Method", "GET");
-					 * conexao.setDoInput(true); conexao.setDoOutput(false);
-					 * conexao.connect(); InputStream in =
-					 * conexao.getInputStream();
-					 */
-					/*byte[] bytes = leBytes(in);
-
-					FileOutputStream fos = new FileOutputStream(imagem);
-					fos.write(bytes);
-					fos.close();
-					Log.i(TAG, "imagem retornada com: " + bytes.length
-							+ " bytes");
-					// conexao.disconnect();
-					return "Imagem retornada com: " + bytes.length + " bytes";*/
 				}
 			} catch (MalformedURLException e) {
 				Log.e(getClass().getName(), e.getMessage(), e);
-			} 
+			}
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
 			if (result != null) {
-				Toast.makeText(Principal.this, result, Toast.LENGTH_LONG)
+				Toast.makeText(context, result, Toast.LENGTH_LONG).show();
+			} else {
+				Toast.makeText(context, "A imagem já existe!", Toast.LENGTH_LONG)
 						.show();
-			} else {
-				Toast.makeText(Principal.this, "A imagem já existe!",
-						Toast.LENGTH_LONG).show();
 			}
 
 		}
 
-	}
-
-	// /// metodos utilitários
-	/*
-	 * // baixa um arquivo protected Bitmap download(String url) throws
-	 * IOException { byte[] bytes = this.baixaImagem(url); if (bytes != null) {
-	 * Log.i(getClass().getName(), "Criando Bitmap com BitmapFactory " + bytes);
-	 * Bitmap imagem = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-	 * return imagem; } return null; }// fim do método download
-	 */
-	private boolean imagemJaExiste(File imagem) {
-		if (imagem.exists() && imagem.isFile()) {
-			Log.w(getClass().getName(), "A imagem já existe no diretório.");
-			return true;
+		// /// metodos utilitários
+		/*
+		 * // baixa um arquivo protected Bitmap download(String url) throws
+		 * IOException { byte[] bytes = this.baixaImagem(url); if (bytes != null) {
+		 * Log.i(getClass().getName(), "Criando Bitmap com BitmapFactory " + bytes);
+		 * Bitmap imagem = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+		 * return imagem; } return null; }// fim do método download
+		 */
+		private boolean imagemJaExiste(File imagem) {
+			if (imagem.exists() && imagem.isFile()) {
+				Log.w(getClass().getName(), "A imagem já existe no diretório.");
+				return true;
+			}
+			return false;
 		}
-		return false;
-	}
 
-	private boolean diretorioImagensExiste(File diretorio) {
-		return diretorio.exists();
-	}
+		private boolean diretorioImagensExiste(File diretorio) {
+			return diretorio.exists();
+		}
 
-	private void criaDiretorioImagens(File diretorio) {
-		boolean success = false;
-		if (!diretorioImagensExiste(diretorio)) {
-			success = diretorio.mkdirs();
-			if (!success) {
-				Log.d("Arquivo", "Erro ao criar o diretorio imagens");
-			} else {
-				Log.d("Arquivo", "Criado o diretorio de imagens");
+		private void criaDiretorioImagens(File diretorio) {
+			boolean success = false;
+			if (!diretorioImagensExiste(diretorio)) {
+				success = diretorio.mkdirs();
+				if (!success) {
+					Log.d("Arquivo", "Erro ao criar o diretorio imagens");
+				} else {
+					Log.d("Arquivo", "Criado o diretorio de imagens");
+				}
+			}
+		}
+
+		private byte[] leBytes(InputStream in) throws IOException {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			try {
+				byte[] buffer = new byte[1024];
+				int len;
+				while ((len = in.read(buffer)) > 0) {
+					bos.write(buffer, 0, len);
+				}
+				return bos.toByteArray();
+			} finally {
+				bos.close();
+				in.close();
 			}
 		}
 	}
-
-	private byte[] leBytes(InputStream in) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		try {
-			byte[] buffer = new byte[1024];
-			int len;
-			while ((len = in.read(buffer)) > 0) {
-				bos.write(buffer, 0, len);
-			}
-			return bos.toByteArray();
-		} finally {
-			bos.close();
-			in.close();
-		}
-	}
-
 }

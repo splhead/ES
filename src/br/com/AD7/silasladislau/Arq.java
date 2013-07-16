@@ -37,7 +37,7 @@ public class Arq {
     		//}
     		//else
     		//{
-    			caminho = new File("/data/data/" + c.getPackageName()+ "/imagens/" + endereco.substring(endereco.lastIndexOf('/')+1));
+    			caminho = new File(c.getFilesDir() + "/imagens/" + endereco.substring(endereco.lastIndexOf('/')+1));
     		//}
     		    		   		
     		long inicio = System.currentTimeMillis();
