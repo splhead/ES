@@ -1,6 +1,5 @@
 package br.com.AD7.silasladislau;
 
-
 import java.io.IOException;
 import java.util.StringTokenizer;
 import org.jsoup.Jsoup;
@@ -10,7 +9,10 @@ import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
 import br.com.AD7.silasladislau.IO.DownloadService;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 //import android.graphics.Bitmap;
 //import android.graphics.BitmapFactory;
@@ -27,29 +29,61 @@ public class Principal extends Activity {
 	private String capa, tmp;
 	private int ordem_trimestre, ano = 2012;
 	private StringBuilder titulo = new StringBuilder();
-		
-	private Handler handler = new Handler() {
-	    public void handleMessage(Message message) {
-	      Object path = message.obj;
-	      if (message.arg1 == RESULT_OK && path != null) {
-	        Toast.makeText(Principal.this,
-	            "Capas baixadas" + path.toString(), Toast.LENGTH_LONG)
-	            .show();
-	      } else {
-	        Toast.makeText(Principal.this, "Falha ao baixar as capas.",
-	            Toast.LENGTH_LONG).show();
-	      }
 
-	    };
-	  };
+	private Handler handler = new Handler() {
+		public void handleMessage(Message message) {
+			Object path = message.obj;
+			if (message.arg1 == RESULT_OK && path != null) {
+				Toast.makeText(Principal.this,
+						"Capas baixadas" + path.toString(), Toast.LENGTH_LONG)
+						.show();
+			} else {
+				Toast.makeText(Principal.this, "Falha ao baixar as capas.",
+						Toast.LENGTH_LONG).show();
+			}
+
+		};
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		atualizaTrimestres(ano);
-		// trimestreAtualNoSite(ano);
+		if (internetDisponivel(this)) {
+			atualizaTrimestres(ano);
+			// trimestreAtualNoSite(ano);
+		} else {
+			Toast.makeText(this, "Ops! Sem Internet!", Toast.LENGTH_SHORT)
+					.show();
+		}
+	}
+
+	/**
+	 * Verifica se há uma conexão disponível.
+	 * 
+	 * @param con
+	 *            - Contexto
+	 * @return True se estiver conectado ou False se não.
+	 */
+	public Boolean internetDisponivel(Context con) {
+
+		try {
+			ConnectivityManager connectivityManager = (ConnectivityManager) con
+					.getSystemService(Context.CONNECTIVITY_SERVICE);
+			NetworkInfo wifiInfo = connectivityManager
+					.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+			NetworkInfo mobileInfo = connectivityManager
+					.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+			if (wifiInfo.isConnected() || mobileInfo.isConnected()) {
+				Log.d("TestaInternet", "Está conectado.");
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Log.d("TestaInternet", "Não está conectado.");
+		return false;
 	}
 
 	/**
@@ -68,7 +102,7 @@ public class Principal extends Activity {
 
 		for (int i = 0; i < trimestres.size(); i++) {
 			tmp = trimestres.get(i).text().replace('/', ' ');
-			//Log.d("trimestre", tmp);
+			// Log.d("trimestre", tmp);
 			StringTokenizer tokens = new StringTokenizer(tmp);
 			// 1¤ Trimestre 2011 - A Bíblia e as emoções humanas
 			// pega apenas o primeiro char de 4¤ e converte para int
@@ -86,18 +120,19 @@ public class Principal extends Activity {
 			// Log.d("trimestre", titulo.toString());
 			// obtem o endereço absoluto da imagem no site
 			capa = capas.get(i).attr("abs:src");
-			
+
 			// baixa a imagem em outro processo
+
 			Intent intent = new Intent(this, DownloadService.class);
 			Messenger messenger = new Messenger(handler);
-		    intent.putExtra("MESSENGER", messenger);
-		    intent.setData(Uri.parse(capa));
-		    intent.putExtra("urlpath", capa);
-		    startService(intent);
-			
+			intent.putExtra("MESSENGER", messenger);
+			intent.setData(Uri.parse(capa));
+			intent.putExtra("urlpath", capa);
+			startService(intent);
+
 			// pega o nome original da imagem da capa
 			capa = capa.substring(capa.lastIndexOf("/") + 1);
-			//Log.d("capa", capa);
+			// Log.d("capa", capa);
 			// GregorianCalendar gc=new GregorianCalendar();
 			// gc.set(Integer.parseInt(ano), 0, 1);
 			// SimpleDateFormat formatador = new
@@ -114,9 +149,9 @@ public class Principal extends Activity {
 			// limpa a variavel
 			capa = null;
 		}
-	}	
+	}
 
-	public Document getHtml(int ano) {		
+	public Document getHtml(int ano) {
 		String url = "http://www.cpb.com.br/htdocs/periodicos/les" + ano
 				+ ".html";
 		try {
@@ -127,7 +162,8 @@ public class Principal extends Activity {
 
 			return doc;
 		} catch (IOException e) {
-			Toast.makeText(this, "Erro:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Erro:" + e.getMessage(), Toast.LENGTH_SHORT)
+					.show();
 			return null;
 		}
 	}
@@ -159,5 +195,5 @@ public class Principal extends Activity {
 		Log.i(getClass().getName(),
 				"Trimestre Atual: " + String.valueOf(trimestreAtual));
 		return trimestreAtual;
-	}	
+	}
 }
