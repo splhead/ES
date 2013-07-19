@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
 import br.com.AD7.silasladislau.IO.DownloadService;
@@ -21,13 +22,19 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
+import android.webkit.WebView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 @SuppressLint("HandlerLeak")
 public class Principal extends Activity {
 	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
 	private String capa, tmp;
-	private int ordem_trimestre, ano = 2012;
+	private static final int ADULTO = 0, JOVEM = 1;
+	private int ordem_trimestre, ano = 2013, tipo = JOVEM; // ano e tipo para
+															// teste !!!!
+															// remover!!!
+
 	private StringBuilder titulo = new StringBuilder();
 
 	private Handler handler = new Handler() {
@@ -51,8 +58,9 @@ public class Principal extends Activity {
 		setContentView(R.layout.main);
 
 		if (internetDisponivel(this)) {
-			atualizaTrimestres(ano);
+			// atualizaTrimestres(tipo, ano);
 			// trimestreAtualNoSite(ano);
+			obtemLicao();
 		} else {
 			Toast.makeText(this, "Ops! Sem Internet!", Toast.LENGTH_SHORT)
 					.show();
@@ -92,13 +100,14 @@ public class Principal extends Activity {
 	 * 
 	 * @param int ano
 	 */
-	public void atualizaTrimestres(int ano) {
+	public void atualizaTrimestres(int tipo, int ano) {
+		String tmp;
 		// obtem o html do endereço
-		Document doc = this.getHtml(ano);
+		Document html = this.obtemHtml(this.obtemURLTrimestre(tipo, ano));
 		// pegando do #conteudo por haver erro de sintaxe no html do #trimestre
-		Elements trimestres = this.getElements(doc,
+		Elements trimestres = this.buscaElementos(html,
 				"#trimestres p:matches([t|T]rimestre+)");
-		Elements capas = this.getElements(doc, "#trimestres img");
+		Elements capas = this.buscaElementos(html, "#trimestres img");
 
 		for (int i = 0; i < trimestres.size(); i++) {
 			tmp = trimestres.get(i).text().replace('/', ' ');
@@ -151,13 +160,68 @@ public class Principal extends Activity {
 		}
 	}
 
-	public Document getHtml(int ano) {
-		String url = "http://www.cpb.com.br/htdocs/periodicos/les" + ano
-				+ ".html";
+	public void obtemLicao() {
+		String url = "http://www.cpb.com.br/htdocs/periodicos/licoes/jovens/2013/lj432013.html";
+		Document html = obtemHtml(url);
+		Element h1s = buscaElemento(html, "div#conteudo div table tbody tr td h1");
+		Log.d("obtemLicao", h1s.text());
+		
+		Element data_inicial_final = buscaElemento(html,
+				"div#conteudo div table tbody tr td div p strong");
+		
+		Element ilustracao = buscaElemento(html, "div#conteudo p img");		
+		Uri urlIlustração = Uri.parse(ilustracao.attr("abs:src"));
+		String nomeArquivoIlustracao = urlIlustração.getLastPathSegment();
+		Log.d("obtemLicao", urlIlustração.toString() + " " + nomeArquivoIlustracao);
+		
+		Elements sabado = buscaElementos(html, "div#conteudo blockquote p");
+		String textoSabado = "";
+		for(Element elt: sabado) {
+			textoSabado += elt.html();
+		}
+		Log.d("obtemLicao", textoSabado);
+		/*Element l = buscaElemento(html, "div#conteudo");
+		Log.d("obtemLicao", l.html());
+		String data = "<html><body>" + textoSabado + "</body></html>";
+		WebView wV = (WebView) findViewById(R.id.webView1);
+		wV.loadData(data, "text/html", "UTF-8");
+		wV.loadUrl(url);*/
+		
+		
+		
+		
+		Log.d("obtemLicao", data_inicial_final.text());
+		
+		
+		
+
+	}
+
+	/**
+	 * Obtem a url do trimestre conforme o tipo e ano.
+	 * 
+	 * @param tipo
+	 *            - ex.: ADULTO ou JOVEM
+	 * @param ano
+	 *            - ex.: 2012
+	 * @return String url
+	 */
+	private String obtemURLTrimestre(int tipo, int ano) {
+		String url = "http://www.cpb.com.br/htdocs/periodicos/les";
+		if (tipo == ADULTO) {
+			url += ano + ".html";
+		} else {
+			url += "jovens" + ano + ".html";
+		}
+		Log.d("obtemURLTrimestre", url);
+		return url;
+	}
+
+	public Document obtemHtml(String url) {
 		try {
 			// obtem o html do endereço
 			Document doc = Jsoup.connect(url).get();
-			Log.d("Elementos", "Abrindo " + url);
+			Log.d("obtemHTML", "Abrindo " + url);
 			// faz a selecao dos elementos desejados com base na query
 
 			return doc;
@@ -168,8 +232,12 @@ public class Principal extends Activity {
 		}
 	}
 
-	public Elements getElements(Document doc, String query) {
-		return doc.select(query);
+	public Elements buscaElementos(Document html, String busca) {
+		return html.select(busca);
+	}
+
+	public Element buscaElemento(Document html, String busca) {
+		return html.select(busca).first();
 	}
 
 	/**
@@ -178,10 +246,10 @@ public class Principal extends Activity {
 	 * @param int ano
 	 * @return int trimestre_atual
 	 */
-	public int trimestreAtualNoSite(int ano) {
+	public int trimestreAtualNoSite(int tipo, int ano) {
 		int trimestreAtual = 0;
-		Document doc = this.getHtml(ano);
-		Elements trimestres = this.getElements(doc,
+		Document doc = this.obtemHtml(obtemURLTrimestre(tipo, ano));
+		Elements trimestres = this.buscaElementos(doc,
 				"#conteudo p:matches([t|T]rimestre+)");
 		for (int i = 0; i < trimestres.size(); i++) {
 			tmp = trimestres.get(i).text().replace('/', ' ');
