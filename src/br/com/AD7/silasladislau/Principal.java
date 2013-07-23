@@ -1,6 +1,9 @@
 package br.com.AD7.silasladislau;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.StringTokenizer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -34,19 +37,20 @@ public class Principal extends Activity {
 	private int ordem_trimestre, ano = 2013, tipo = JOVEM; // ano e tipo para
 															// teste !!!!
 															// remover!!!
-
+	private Object path;
 	private StringBuilder titulo = new StringBuilder();
 
 	private Handler handler = new Handler() {
 		public void handleMessage(Message message) {
-			Object path = message.obj;
+			path = message.obj;
 			if (message.arg1 == RESULT_OK && path != null) {
 				Toast.makeText(Principal.this,
-						"Capas baixadas" + path.toString(), Toast.LENGTH_LONG)
+						"Arquivo baixado " + path.toString(), Toast.LENGTH_LONG)
 						.show();
 			} else {
-				Toast.makeText(Principal.this, "Falha ao baixar as capas.",
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(Principal.this,
+						"Ops! Falha ao baixar arquivo(s).", Toast.LENGTH_LONG)
+						.show();
 			}
 
 		};
@@ -163,37 +167,95 @@ public class Principal extends Activity {
 	public void obtemLicao() {
 		String url = "http://www.cpb.com.br/htdocs/periodicos/licoes/jovens/2013/lj432013.html";
 		Document html = obtemHtml(url);
-		Element h1s = buscaElemento(html, "div#conteudo div table tbody tr td h1");
+		/*
+		 * Intent intent = new Intent(this, DownloadService.class); Messenger
+		 * messenger = new Messenger(handler); intent.putExtra("MESSENGER",
+		 * messenger); intent.setData(Uri.parse(url));
+		 * intent.putExtra("urlpath", url); startService(intent);
+		 * 
+		 * try { File input = new File(this.getFilesDir() + "/" +
+		 * Uri.parse(url).getLastPathSegment()); Document html =
+		 * Jsoup.parse(input, "UTF-8", url); //
+		 * html.getElementsByTag("head").html( //
+		 * "<meta name='viewport' content='width=device-width'/>");
+		 * 
+		 * html.select("body") .attr("style",
+		 * "background-color:#fff;font: 1.1em 'Tahoma, Verdana, Arial, Helvetica, sans-serif'"
+		 * ); html.select("table[width=735]").attr("width", "100%");
+		 * html.select("hr[width=750]").attr("width", "100%");
+		 * html.getElementsByTag("blockquote").attr("style",
+		 * "margin:0; padding:0");
+		 * 
+		 * for (Element i : html.select("img")) { i.attr("src",
+		 * i.attr("abs:src")); i.attr("style", "margin:0; padding:0"); if
+		 * (!i.attr("width").equals(null) && Integer.parseInt(i.attr("width")) >
+		 * 320) { i.attr("width", "100%"); i.attr("height", "50%"); } }
+		 * 
+		 * html.select("div#cabecalho, div#main_nav, div#trimestres").remove();
+		 * Log.d("obtemLicao", "html: " + html.html()); String base64 =
+		 * android.util.Base64.encodeToString(html.html() .getBytes("UTF-8"),
+		 * android.util.Base64.DEFAULT); WebView wV = (WebView)
+		 * findViewById(R.id.webView1);
+		 * wV.getSettings().setJavaScriptEnabled(true); wV.loadData(base64,
+		 * "text/html; charset=utf-8", "base64"); } catch (IOException e) { //
+		 * TODO: handle exception }
+		 */
+
+		Element h1s = buscaElemento(html,
+				"div#conteudo div table tbody tr td h1");
 		Log.d("obtemLicao", h1s.text());
-		
+
 		Element data_inicial_final = buscaElemento(html,
 				"div#conteudo div table tbody tr td div p strong");
-		
-		Element ilustracao = buscaElemento(html, "div#conteudo p img");		
+		Log.d("obtemLicao", data_inicial_final.text());
+
+		Element ilustracao = buscaElemento(html, "div#conteudo p img");
 		Uri urlIlustração = Uri.parse(ilustracao.attr("abs:src"));
 		String nomeArquivoIlustracao = urlIlustração.getLastPathSegment();
-		Log.d("obtemLicao", urlIlustração.toString() + " " + nomeArquivoIlustracao);
-		
+		Log.d("obtemLicao", urlIlustração.toString() + " "
+				+ nomeArquivoIlustracao);
+
 		Elements sabado = buscaElementos(html, "div#conteudo blockquote p");
 		String textoSabado = "";
-		for(Element elt: sabado) {
+		for (Element elt : sabado) {
 			textoSabado += elt.html();
 		}
 		Log.d("obtemLicao", textoSabado);
-		/*Element l = buscaElemento(html, "div#conteudo");
-		Log.d("obtemLicao", l.html());
-		String data = "<html><body>" + textoSabado + "</body></html>";
-		WebView wV = (WebView) findViewById(R.id.webView1);
-		wV.loadData(data, "text/html", "UTF-8");
-		wV.loadUrl(url);*/
-		
-		
-		
-		
-		Log.d("obtemLicao", data_inicial_final.text());
-		
-		
-		
+
+		Element tituloDomingo = buscaElemento(html,
+				"table + p + hr + p + table td");
+		Log.d("obtemLicao", tituloDomingo.text());
+
+		Element pDomingo = buscaElemento(html, "table + p + div + p");
+		Log.d("Domingo", pDomingo.text());
+		Element nDomingo = pDomingo.nextElementSibling();
+		//Log.d("Domingo1", nDomingo.tagName());
+		while (nDomingo.tagName().equals("p")) {
+			Log.d("Domingo1", nDomingo.text());
+			nDomingo = nDomingo.nextElementSibling();
+		}
+		/*String saida = "";
+		do {
+			saida += nDomingo.text();
+			nDomingo.nextElementSibling();
+		} while (nDomingo.tagName().equals("p"));
+		Log.d("Domingo1", saida);*/
+		/*if (nDomingo.tagName().equals("p")) {
+			Log.d("Domingo1", nDomingo.text());
+		}*/
+
+		/*
+		 * for(Element elt: textoDomingo) { //if(elt.text().length() > 1) {
+		 * Log.d("Domingo", elt.text()); //} }
+		 */
+
+		/*
+		 * Element l = buscaElemento(html, "div#conteudo"); Log.d("obtemLicao",
+		 * l.html()); String data =
+		 * "<!doctype html><html><head><title>teste</title><meta name='viewport' content='width=device-width'/></head><body><div>"
+		 * + l.html() + "</div></body></html>"; Log.d("obtemLicao", "data: " +
+		 * data);
+		 */
 
 	}
 
