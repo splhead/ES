@@ -34,7 +34,7 @@ public class Principal extends Activity {
 	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
 	private String capa, tmp;
 	private static final int ADULTO = 0, JOVEM = 1;
-	private int ordem_trimestre, ano = 2013, tipo = JOVEM; // ano e tipo para
+	private int ordem_trimestre, ano = 2014, tipo = JOVEM; // ano e tipo para
 															// teste !!!!
 															// remover!!!
 	private Object path;
@@ -165,7 +165,7 @@ public class Principal extends Activity {
 	}
 
 	public void obtemLicao() {
-		String url = "http://www.cpb.com.br/htdocs/periodicos/licoes/jovens/2013/lj432013.html";
+		String url = "http://cpbmais.cpb.com.br/htdocs/periodicos/licoes/jovens/2014/lj622014.html";
 		Document html = obtemHtml(url);
 		/*
 		 * Intent intent = new Intent(this, DownloadService.class); Messenger
