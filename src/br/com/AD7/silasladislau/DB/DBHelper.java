@@ -15,19 +15,21 @@ public class DBHelper extends SQLiteOpenHelper {
 			"CREATE TABLE IF NOT EXISTS trimestre ("
 					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ "titulo TEXT NOT NULL, ordem_trimestre INTEGER NOT NULL,"
-					+ "ano INTEGER NOT NULL," + "capa TEXT NOT NULL" +
+					+ "ano INTEGER NOT NULL," + "capa BLOB NOT NULL" +
 					// "PRIMARY KEY(ordem_trimestre,ano)" +
 					");",
 			"CREATE TABLE IF NOT EXISTS licao("
 					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ "data_inicial NUMERIC NOT NULL,"
 					+ "titulo TEXT NOT NULL,"
+					+ "capa BLOB NOT NULL,"
 					+ "trimestre_id INTEGER NOT NULL,"
 					+ "FOREIGN KEY(trimestre_id) REFERENCES trimestre(_id)"
 					+ ");",
-			"CREATE TABLE IF NOT EXISTS texto("
+			"CREATE TABLE IF NOT EXISTS dia("
 					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ "dia NUMERIC NOT NULL," + "titulo TEXT NOT NULL,"
+					+ "texto TEXT NOT NULL,"
 					+ "licao_id INTEGER NOT NULL,"
 					+ "FOREIGN KEY(licao_id) REFERENCES licao(_id)" + ");", };
 
@@ -63,7 +65,7 @@ public class DBHelper extends SQLiteOpenHelper {
 						+ ", que apagará todos os dados da versão antiga");
 		bancodados.execSQL("DROP TABLE IF EXISTS trimestre");
 		bancodados.execSQL("DROP TABLE IF EXISTS licao");
-		bancodados.execSQL("DROP TABLE IF EXISTS texto");
+		bancodados.execSQL("DROP TABLE IF EXISTS dia");
 		onCreate(bancodados);
 	}
 

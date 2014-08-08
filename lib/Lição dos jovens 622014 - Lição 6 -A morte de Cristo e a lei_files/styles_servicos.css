@@ -1,0 +1,108 @@
+* {
+	margin:0;
+	padding:0;
+}
+body {
+	margin: auto;
+	border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: none;
+	border-left-style: none;
+	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	color: #9a9a9a;
+}
+.imgreplace {
+	display:block;
+	overflow:hidden;
+	text-indent:-9999px;
+}
+.clear {clear:both;}
+#cabecalho {
+	height: 98px;
+	width: 980px;
+	background: url(../../../img_periodicos/bg_header.jpg) no-repeat;
+	margin:5px auto 0 auto;
+	position:relative;
+}
+h1#logo a {
+	width:198px;
+	height:54px;
+	background:url(../../../img_periodicos/logo_cpb.png) no-repeat;
+	position:absolute;
+	top:32px;
+	left:15px;
+}
+#container {
+	background-color: #FFFFFF;
+	width: 978px;
+	height: auto;
+	margin: auto;
+	padding:10px 0 0 0;
+	border-right-width: thin;
+	border-bottom-width: thin;
+	border-left-width: thin;
+	border-top-style: none;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-left-style: solid;
+	border-right-color: #CECFD1;
+	border-bottom-color: #CECFD1;
+	border-left-color: #CECFD1;
+}
+#main_nav {
+	height: 47px;
+	width: 980px;
+	/*background-image: url(../../../img_periodicos/tab_servicos.png);
+	background-repeat: no-repeat;
+	background-position: center;*/
+}
+ul#nav {
+	margin:0 7px 0 7px;
+	background:url(../../../img_periodicos/nav.gif) repeat-x;
+	border:1px solid #d6d5d5;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	height:41px;
+}
+ul#nav a:hover {text-decoration:underline;}
+ul#nav a {
+	color:#9A9A9A;
+	text-decoration:none;
+	font-weight:bold;
+}
+ul#nav li {
+	display:inline-block;
+	margin:2px 0 0 25px;
+	height:31px;
+	padding:10px 25px 0 0;
+	font:13px Arial,Helvetica,sans-serif;
+	background:url(../../../img_periodicos/separador.gif) no-repeat right top;
+}
+li.last {background:none !important;}
+div#trimestres {
+	width: 195px;
+	margin:10px 0 0 7px;
+	background: url(../../../img_periodicos/bt_trimestres.png) no-repeat;
+	float:left;
+}
+div#trimestres h2 {
+	font-size:15px;
+	text-align:center;
+	padding:13px 0 0 0;
+}
+div#conteudo {
+	width:750px;
+	float:left;
+	margin-top: 10px;
+	margin-right: 8px;
+	margin-bottom: 10px;
+	margin-left: 18px;
+	color: #000;
+	font-weight: normal;
+}
+/*#container #conteudo h2titulo {
+	color: #FDA11E;
+}*/

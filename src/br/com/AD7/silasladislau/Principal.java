@@ -1,20 +1,32 @@
 package br.com.AD7.silasladislau;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.StringTokenizer;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
 import br.com.AD7.silasladislau.IO.DownloadService;
+import br.com.AD7.silasladislau.IO.UtilImagem;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -26,6 +38,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
 import android.webkit.WebView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +48,7 @@ public class Principal extends Activity {
 	private String capa, tmp;
 	private static final int ADULTO = 0, JOVEM = 1;
 	private int ordem_trimestre, ano = 2014, tipo = JOVEM; // ano e tipo para
-															// teste !!!!
+														// teste !!!!
 															// remover!!!
 	private Object path;
 	private StringBuilder titulo = new StringBuilder();
@@ -60,15 +73,22 @@ public class Principal extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-
-		if (internetDisponivel(this)) {
-			// atualizaTrimestres(tipo, ano);
-			// trimestreAtualNoSite(ano);
-			obtemLicao();
-		} else {
-			Toast.makeText(this, "Ops! Sem Internet!", Toast.LENGTH_SHORT)
-					.show();
-		}
+		
+		
+		// if (internetDisponivel(this)) {
+		atualizaTrimestres(tipo, ano);
+		/*image = (ImageView) findViewById(R.id.imageView);
+		Trimestre trim = dba.buscaTrimestre(3, 2014);
+		if(trim.getCapa() != null) {
+			Log.d("image", "capa não vazia");
+			image.setImageBitmap(BitmapFactory.decodeByteArray(trim.getCapa(),0,trim.getCapa().length));
+		}*/
+		// trimestreAtualNoSite(ano);
+		//obtemLicao();
+		/*
+		 * } else { Toast.makeText(this, "Ops! Sem Internet!",
+		 * Toast.LENGTH_SHORT) .show(); }
+		 */
 	}
 
 	/**
@@ -133,18 +153,21 @@ public class Principal extends Activity {
 			// Log.d("trimestre", titulo.toString());
 			// obtem o endereço absoluto da imagem no site
 			capa = capas.get(i).attr("abs:src");
-
+			
 			// baixa a imagem em outro processo
-
-			Intent intent = new Intent(this, DownloadService.class);
+			byte[] imagem = getFile(capa);
+			ImageView image = (ImageView) findViewById(R.id.imageView);
+			//image.setImageBitmap(getFile(capa));
+			image.setImageBitmap(BitmapFactory.decodeByteArray(imagem,0,imagem.length));
+			/*Intent intent = new Intent(this, DownloadService.class);
 			Messenger messenger = new Messenger(handler);
 			intent.putExtra("MESSENGER", messenger);
 			intent.setData(Uri.parse(capa));
 			intent.putExtra("urlpath", capa);
-			startService(intent);
+			startService(intent); */
 
 			// pega o nome original da imagem da capa
-			capa = capa.substring(capa.lastIndexOf("/") + 1);
+			//capa = capa.substring(capa.lastIndexOf("/") + 1);
 			// Log.d("capa", capa);
 			// GregorianCalendar gc=new GregorianCalendar();
 			// gc.set(Integer.parseInt(ano), 0, 1);
@@ -152,10 +175,10 @@ public class Principal extends Activity {
 			// SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			// String ano_tmp = formatador.format(gc.getTime());
 
-			Trimestre trimestre = new Trimestre(titulo.toString(),
-					ordem_trimestre, ano, capa);
+			//Trimestre trimestre = new Trimestre(titulo.toString(),
+			//		ordem_trimestre, ano, imagem);
 
-			dba.addTrimestre(trimestre);
+			//dba.addTrimestre(trimestre);
 
 			// limpa a StringBuilder para o proximo titulo
 			titulo.delete(0, titulo.length());
@@ -163,100 +186,127 @@ public class Principal extends Activity {
 			capa = null;
 		}
 	}
+	private byte[] getFile(String urlString) {
+		final DefaultHttpClient client = new DefaultHttpClient();
+		final HttpGet getRequest = new HttpGet(urlString);
+		try {
+			
+			HttpResponse response = client.execute(getRequest);
+			// check 200 OK for success
+			final int statusCode = response.getStatusLine().getStatusCode();
 
+			if (statusCode != HttpStatus.SC_OK) {
+				Log.w("Download", "Erro " + statusCode
+						+ " enquanto baixa a imagem " + urlString);
+			}
+
+			final HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				InputStream in = null;
+				try {
+					// getting contents from the stream
+					in = entity.getContent();
+					byte[] bytes = leBytes(in);
+					return bytes;
+				} catch (Exception e) {
+					// TODO: handle exception
+				} finally {
+					entity.consumeContent();
+					
+				}				
+				
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	private byte[] leBytes(InputStream in) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		try {
+			byte[] buffer = new byte[1024];
+			int len;
+			while ((len = in.read(buffer)) > 0) {
+				bos.write(buffer, 0, len);
+			}
+			return bos.toByteArray();
+		} finally {
+			bos.close();
+			in.close();
+		}
+	}
 	public void obtemLicao() {
-		String url = "http://cpbmais.cpb.com.br/htdocs/periodicos/licoes/jovens/2014/lj622014.html";
+		String url = "http://cpbmais.cpb.com.br/htdocs/periodicos/licoes/jovens/2014/lj632014.html";
 		Document html = obtemHtml(url);
-		/*
-		 * Intent intent = new Intent(this, DownloadService.class); Messenger
-		 * messenger = new Messenger(handler); intent.putExtra("MESSENGER",
-		 * messenger); intent.setData(Uri.parse(url));
-		 * intent.putExtra("urlpath", url); startService(intent);
-		 * 
-		 * try { File input = new File(this.getFilesDir() + "/" +
-		 * Uri.parse(url).getLastPathSegment()); Document html =
-		 * Jsoup.parse(input, "UTF-8", url); //
-		 * html.getElementsByTag("head").html( //
-		 * "<meta name='viewport' content='width=device-width'/>");
-		 * 
-		 * html.select("body") .attr("style",
-		 * "background-color:#fff;font: 1.1em 'Tahoma, Verdana, Arial, Helvetica, sans-serif'"
-		 * ); html.select("table[width=735]").attr("width", "100%");
-		 * html.select("hr[width=750]").attr("width", "100%");
-		 * html.getElementsByTag("blockquote").attr("style",
-		 * "margin:0; padding:0");
-		 * 
-		 * for (Element i : html.select("img")) { i.attr("src",
-		 * i.attr("abs:src")); i.attr("style", "margin:0; padding:0"); if
-		 * (!i.attr("width").equals(null) && Integer.parseInt(i.attr("width")) >
-		 * 320) { i.attr("width", "100%"); i.attr("height", "50%"); } }
-		 * 
-		 * html.select("div#cabecalho, div#main_nav, div#trimestres").remove();
-		 * Log.d("obtemLicao", "html: " + html.html()); String base64 =
-		 * android.util.Base64.encodeToString(html.html() .getBytes("UTF-8"),
-		 * android.util.Base64.DEFAULT); WebView wV = (WebView)
-		 * findViewById(R.id.webView1);
-		 * wV.getSettings().setJavaScriptEnabled(true); wV.loadData(base64,
-		 * "text/html; charset=utf-8", "base64"); } catch (IOException e) { //
-		 * TODO: handle exception }
-		 */
+		//File in = new File(this.getFilesDir() + "/lj532014.html");
+		//File in = new File(this.getFilesDir() + "/licao.html");
+		//Document html;
+		try {
+			//html = Jsoup.parse(in, "UTF-8");
+			Element h1s = buscaElemento(html,
+					"div#conteudo td:matches((?i)lição\\ \\d)");
+			Log.d("obtemLicao", "título: " + h1s.text());
 
-		Element h1s = buscaElemento(html,
-				"div#conteudo div table tbody tr td h1");
-		Log.d("obtemLicao", h1s.text());
+			Element data_inicial_final = buscaElemento(html,
+					"div#conteudo td p:matches(\\d*\\ a\\ \\d*");
+			Log.d("obtemLicao", "data: " + data_inicial_final.text());
 
-		Element data_inicial_final = buscaElemento(html,
-				"div#conteudo div table tbody tr td div p strong");
-		Log.d("obtemLicao", data_inicial_final.text());
+			Element ilustracao = buscaElemento(html,
+					"div#conteudo p[align=center] img");
+			Uri urlIlustração = Uri.parse(ilustracao.attr("abs:src"));
+			String nomeArquivoIlustracao = urlIlustração.getLastPathSegment();
+			Log.d("obtemLicao", urlIlustração.toString() + " "
+					+ nomeArquivoIlustracao);
 
-		Element ilustracao = buscaElemento(html, "div#conteudo p img");
-		Uri urlIlustração = Uri.parse(ilustracao.attr("abs:src"));
-		String nomeArquivoIlustracao = urlIlustração.getLastPathSegment();
-		Log.d("obtemLicao", urlIlustração.toString() + " "
-				+ nomeArquivoIlustracao);
+			Element raiz = buscaElemento(html, "div#conteudo");
+			getDia(html, raiz, "Sábado");
+			getDia(html, raiz, "Domingo");
+			getDia(html, raiz, "Segunda");
+			getDia(html, raiz, "Terça");
+			getDia(html, raiz, "Quarta");
+			getDia(html, raiz, "Quinta");
+			getDia(html, raiz, "Sexta");
 
-		Elements sabado = buscaElementos(html, "div#conteudo blockquote p");
-		String textoSabado = "";
-		for (Element elt : sabado) {
-			textoSabado += elt.html();
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			this.finish();
+			System.exit(1);
 		}
-		Log.d("obtemLicao", textoSabado);
-
-		Element tituloDomingo = buscaElemento(html,
-				"table + p + hr + p + table td");
-		Log.d("obtemLicao", tituloDomingo.text());
-
-		Element pDomingo = buscaElemento(html, "table + p + div + p");
-		Log.d("Domingo", pDomingo.text());
-		Element nDomingo = pDomingo.nextElementSibling();
-		//Log.d("Domingo1", nDomingo.tagName());
-		while (nDomingo.tagName().equals("p")) {
-			Log.d("Domingo1", nDomingo.text());
-			nDomingo = nDomingo.nextElementSibling();
+	}
+	
+	/*
+	 * pega o texto do dia
+	 */
+	private void getDia(Document html, Element raiz, String nomeDia) {
+		Element dia = buscaElemento(html, "td:contains(" + nomeDia +")");
+		Element prox = proximo(dia, raiz);
+		int contaHR = 0;
+			
+		while (contaHR < 2) {
+			if (prox.tagName().equals("hr")) {
+				contaHR += 1;
+			}
+			Log.d("gD", nomeDia + ": " + prox.tagName() +' '+ prox.text());
+			//passa para o próximo do mesmo nível
+			prox = prox.nextElementSibling();
 		}
-		/*String saida = "";
-		do {
-			saida += nDomingo.text();
-			nDomingo.nextElementSibling();
-		} while (nDomingo.tagName().equals("p"));
-		Log.d("Domingo1", saida);*/
-		/*if (nDomingo.tagName().equals("p")) {
-			Log.d("Domingo1", nDomingo.text());
-		}*/
-
-		/*
-		 * for(Element elt: textoDomingo) { //if(elt.text().length() > 1) {
-		 * Log.d("Domingo", elt.text()); //} }
-		 */
-
-		/*
-		 * Element l = buscaElemento(html, "div#conteudo"); Log.d("obtemLicao",
-		 * l.html()); String data =
-		 * "<!doctype html><html><head><title>teste</title><meta name='viewport' content='width=device-width'/></head><body><div>"
-		 * + l.html() + "</div></body></html>"; Log.d("obtemLicao", "data: " +
-		 * data);
-		 */
-
+	}
+	
+	/*
+	 * Sobe o nível até a raiz para buscar os próximos elementos
+	 */
+	private Element proximo(Element irmao, Element raiz) {
+		Element proximo = irmao;
+		Log.d("oL", "pProximo: " + proximo.tagName() + " " + proximo.id());
+		while (!proximo.parent().id().equals(raiz.id())) {
+			proximo = proximo.parent();
+			Log.d("oL", "proximo: " + proximo.tagName() + " " + proximo.id());
+		}
+		Log.d("oL", "uProximo: " + proximo.tagName());
+		return proximo;
 	}
 
 	/**
@@ -269,7 +319,7 @@ public class Principal extends Activity {
 	 * @return String url
 	 */
 	private String obtemURLTrimestre(int tipo, int ano) {
-		String url = "http://www.cpb.com.br/htdocs/periodicos/les";
+		String url = "http://cpbmais.cpb.com.br/htdocs/periodicos/les";
 		if (tipo == ADULTO) {
 			url += ano + ".html";
 		} else {
@@ -284,8 +334,7 @@ public class Principal extends Activity {
 			// obtem o html do endereço
 			Document doc = Jsoup.connect(url).get();
 			Log.d("obtemHTML", "Abrindo " + url);
-			// faz a selecao dos elementos desejados com base na query
-
+		
 			return doc;
 		} catch (IOException e) {
 			Toast.makeText(this, "Erro:" + e.getMessage(), Toast.LENGTH_SHORT)
@@ -294,11 +343,11 @@ public class Principal extends Activity {
 		}
 	}
 
-	public Elements buscaElementos(Document html, String busca) {
+	public Elements buscaElementos(Document html, String busca) throws java.lang.NullPointerException {
 		return html.select(busca);
 	}
 
-	public Element buscaElemento(Document html, String busca) {
+	public Element buscaElemento(Document html, String busca) throws java.lang.NullPointerException {
 		return html.select(busca).first();
 	}
 

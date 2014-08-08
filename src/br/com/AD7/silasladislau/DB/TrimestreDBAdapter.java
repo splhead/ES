@@ -61,7 +61,7 @@ public class TrimestreDBAdapter extends DBAdapter{
 			if(c.getCount() > 0){
 				c.moveToFirst();
 				Trimestre trimestre = new Trimestre(c.getLong(0),c.getString(1),
-						c.getInt(2),c.getInt(3),c.getString(4));
+						c.getInt(2),c.getInt(3),c.getBlob(4));
 				
 				Log.d(getClass().getName(), trimestre.toString());
 				return trimestre;

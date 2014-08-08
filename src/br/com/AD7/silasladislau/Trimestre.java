@@ -6,9 +6,9 @@ public class Trimestre {
 	private String titulo;
 	private int ordem_trimestre;
 	private int ano;
-	private String capa;
+	private byte[] capa;
 	
-	public Trimestre(String titulo, int ordem_trimestre, int ano, String capa){
+	public Trimestre(String titulo, int ordem_trimestre, int ano, byte[] capa){
 		super();
 		this.titulo = titulo;
 		this.ordem_trimestre = ordem_trimestre;
@@ -16,7 +16,7 @@ public class Trimestre {
 		this.capa = capa;
 	}
 	
-	public Trimestre(long id,String titulo, int ordem_trimestre, int ano, String capa){
+	public Trimestre(long id,String titulo, int ordem_trimestre, int ano, byte[] capa){
 		super();
 		this.id = id;
 		this.titulo = titulo;
@@ -51,10 +51,10 @@ public class Trimestre {
 	public void setAno(int ano) {
 		this.ano = ano;
 	}
-	public String getCapa() {
+	public byte[] getCapa() {
 		return capa;
 	}
-	public void setCapa(String capa) {
+	public void setCapa(byte[] capa) {
 		this.capa = capa;
 	}
 	public String toString(){		
