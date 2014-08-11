@@ -6,6 +6,6 @@
         android:orderInCategory="100"
         silasladislau:showAsAction="always"
         android:icon="@drawable/ic_action_refresh"
-        android:title="Atualizar"/>
+        android:title="@string/action_refresh"/>
 
 </menu>

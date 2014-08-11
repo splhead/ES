@@ -2,6 +2,7 @@
 <resources>
 
     <string name="hello">Hello World!</string>
+    <string name="action_refresh">Atualizar</string>
     <string name="app_name">Guia</string>
 
 </resources>

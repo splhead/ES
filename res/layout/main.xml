@@ -17,6 +17,15 @@
         android:layout_width="fill_parent"
         android:layout_height="200dp"
         android:clickable="true"
+        android:layout_marginTop="8dp"
         android:src="@drawable/ic_launcher" />
+
+    <TextView
+        android:id="@+id/titulo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lição 3 - Growing Up!"
+        android:textSize="14sp"
+        android:layout_margin="8dp" />
 
 </LinearLayout>

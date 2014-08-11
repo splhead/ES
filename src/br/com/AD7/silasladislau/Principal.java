@@ -1,12 +1,8 @@
 package br.com.AD7.silasladislau;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.StringTokenizer;
 
 import org.apache.http.HttpEntity;
@@ -18,32 +14,26 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
-import br.com.AD7.silasladislau.IO.DownloadService;
-import br.com.AD7.silasladislau.IO.UtilImagem;
+
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-//import android.graphics.Bitmap;
-//import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Messenger;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
-import android.webkit.WebView;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
+//import android.graphics.Bitmap;
+//import android.graphics.BitmapFactory;
 
 @SuppressLint("HandlerLeak")
 public class Principal extends ActionBarActivity {
@@ -80,12 +70,16 @@ public class Principal extends ActionBarActivity {
 		
 		// if (new Util().internetDisponivel(this)) {
 		atualizaTrimestres(tipo, ano);
-		/*image = (ImageView) findViewById(R.id.imageView);
+		ImageView image = (ImageView) findViewById(R.id.imageView);
+		TextView titulo = (TextView) findViewById(R.id.titulo);
+		
 		Trimestre trim = dba.buscaTrimestre(3, 2014);
+		
+		titulo.setText(trim.getTitulo());
 		if(trim.getCapa() != null) {
 			Log.d("image", "capa não vazia");
 			image.setImageBitmap(BitmapFactory.decodeByteArray(trim.getCapa(),0,trim.getCapa().length));
-		}*/
+		}
 		// trimestreAtualNoSite(ano);
 		//obtemLicao();
 		/*
@@ -95,11 +89,30 @@ public class Principal extends ActionBarActivity {
 	}
 	
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    // Inflate the menu items for use in the action bar
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.principal, menu);
+	    return super.onCreateOptionsMenu(menu);
+	}
+	/*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.principal, menu);
         return true;
-    }
+    }*/
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle presses on the action bar items
+	    switch (item.getItemId()) {
+	        case R.id.action_refresh:	           
+	            return true;
+	        
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
 	
 
 	/**
@@ -139,10 +152,14 @@ public class Principal extends ActionBarActivity {
 			capa = capas.get(i).attr("abs:src");
 			
 			// baixa a imagem em outro processo
-			byte[] imagem = getFile(capa);
+			byte[] imagemFile = getFile(capa);
 			ImageView image = (ImageView) findViewById(R.id.imageView);
 			//image.setImageBitmap(getFile(capa));
-			image.setImageBitmap(BitmapFactory.decodeByteArray(imagem,0,imagem.length));
+			Bitmap bitmap = BitmapFactory.decodeByteArray(imagemFile,0,imagemFile.length);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			//comprime a imagem para gravar no banco
+			bitmap.compress(CompressFormat.PNG, 0, baos);
+			image.setImageBitmap(bitmap);
 			/*Intent intent = new Intent(this, DownloadService.class);
 			Messenger messenger = new Messenger(handler);
 			intent.putExtra("MESSENGER", messenger);
@@ -160,7 +177,7 @@ public class Principal extends ActionBarActivity {
 			// String ano_tmp = formatador.format(gc.getTime());
 
 			Trimestre trimestre = new Trimestre(titulo.toString(),
-					ordem_trimestre, ano, imagem);
+					ordem_trimestre, ano, baos.toByteArray());
 
 			dba.addTrimestre(trimestre);
 
