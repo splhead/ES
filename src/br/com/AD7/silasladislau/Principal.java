@@ -37,13 +37,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
+import android.view.Menu;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 
 @SuppressLint("HandlerLeak")
-public class Principal extends Activity {
+public class Principal extends ActionBarActivity {
 	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
 	private String capa, tmp;
 	private static final int ADULTO = 0, JOVEM = 1;
@@ -69,13 +72,13 @@ public class Principal extends Activity {
 		};
 	};
 
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		
-		
-		// if (internetDisponivel(this)) {
+		// if (new Util().internetDisponivel(this)) {
 		atualizaTrimestres(tipo, ano);
 		/*image = (ImageView) findViewById(R.id.imageView);
 		Trimestre trim = dba.buscaTrimestre(3, 2014);
@@ -90,33 +93,14 @@ public class Principal extends Activity {
 		 * Toast.LENGTH_SHORT) .show(); }
 		 */
 	}
-
-	/**
-	 * Verifica se há uma conexão disponível.
-	 * 
-	 * @param con
-	 *            - Contexto
-	 * @return True se estiver conectado ou False se não.
-	 */
-	public Boolean internetDisponivel(Context con) {
-
-		try {
-			ConnectivityManager connectivityManager = (ConnectivityManager) con
-					.getSystemService(Context.CONNECTIVITY_SERVICE);
-			NetworkInfo wifiInfo = connectivityManager
-					.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-			NetworkInfo mobileInfo = connectivityManager
-					.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-			if (wifiInfo.isConnected() || mobileInfo.isConnected()) {
-				Log.d("TestaInternet", "Está conectado.");
-				return true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		Log.d("TestaInternet", "Não está conectado.");
-		return false;
-	}
+	
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.principal, menu);
+        return true;
+    }
+	
 
 	/**
 	 * Busca informações (título, ordem, capa - imagem) de todos os trimestres
@@ -175,10 +159,10 @@ public class Principal extends Activity {
 			// SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			// String ano_tmp = formatador.format(gc.getTime());
 
-			//Trimestre trimestre = new Trimestre(titulo.toString(),
-			//		ordem_trimestre, ano, imagem);
+			Trimestre trimestre = new Trimestre(titulo.toString(),
+					ordem_trimestre, ano, imagem);
 
-			//dba.addTrimestre(trimestre);
+			dba.addTrimestre(trimestre);
 
 			// limpa a StringBuilder para o proximo titulo
 			titulo.delete(0, titulo.length());
