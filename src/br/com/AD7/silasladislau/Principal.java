@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -20,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
+import br.com.AD7.silasladislau.IO.Util;
 //import android.graphics.Bitmap;
 //import android.graphics.BitmapFactory;
 
@@ -70,13 +73,14 @@ public class Principal extends ActionBarActivity {
 		
 		// if (new Util().internetDisponivel(this)) {
 		atualizaTrimestres(tipo, ano);
-		ImageView image = (ImageView) findViewById(R.id.imageView);
+		/*ImageView image = (ImageView) findViewById(R.id.imageView);
 		TextView titulo = (TextView) findViewById(R.id.titulo);
 		
 		Trimestre trim = dba.buscaTrimestre(3, 2014);
 		
-		titulo.setText(trim.getTitulo());
+		
 		if(trim.getCapa() != null) {
+			titulo.setText(trim.getTitulo());
 			Log.d("image", "capa não vazia");
 			image.setImageBitmap(BitmapFactory.decodeByteArray(trim.getCapa(),0,trim.getCapa().length));
 		}
@@ -106,7 +110,8 @@ public class Principal extends ActionBarActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle presses on the action bar items
 	    switch (item.getItemId()) {
-	        case R.id.action_refresh:	           
+	        case R.id.action_refresh:
+	        	//atualizaTrimestres(tipo, ano);
 	            return true;
 	        
 	        default:
@@ -124,119 +129,110 @@ public class Principal extends ActionBarActivity {
 	public void atualizaTrimestres(int tipo, int ano) {
 		String tmp;
 		// obtem o html do endereço
-		Document html = this.obtemHtml(this.obtemURLTrimestre(tipo, ano));
-		// pegando do #conteudo por haver erro de sintaxe no html do #trimestre
-		Elements trimestres = this.buscaElementos(html,
-				"#trimestres p:matches([t|T]rimestre+)");
-		Elements capas = this.buscaElementos(html, "#trimestres img");
-
-		for (int i = 0; i < trimestres.size(); i++) {
-			tmp = trimestres.get(i).text().replace('/', ' ');
-			// Log.d("trimestre", tmp);
-			StringTokenizer tokens = new StringTokenizer(tmp);
-			// 1¤ Trimestre 2011 - A Bíblia e as emoções humanas
-			// pega apenas o primeiro char de 4¤ e converte para int
-			ordem_trimestre = Integer.parseInt(Character.toString(tokens
-					.nextToken().charAt(0)));
-			tokens.nextToken(); // pula a palavra Trimestre
-			tokens.nextToken(); // pula o ano 2011
-			tokens.nextToken(); // pula o "-"
-			// junta todas as palavras que formam o título do trimestre.
-			while (tokens.hasMoreTokens()) {
-				titulo.append(tokens.nextToken() + " ");
-			}
-			titulo.deleteCharAt(titulo.length() - 1);
-			// Log.d("trimestre", String.valueOf(ordem_trimestre));
-			// Log.d("trimestre", titulo.toString());
-			// obtem o endereço absoluto da imagem no site
-			capa = capas.get(i).attr("abs:src");
-			
-			// baixa a imagem em outro processo
-			byte[] imagemFile = getFile(capa);
-			ImageView image = (ImageView) findViewById(R.id.imageView);
-			//image.setImageBitmap(getFile(capa));
-			Bitmap bitmap = BitmapFactory.decodeByteArray(imagemFile,0,imagemFile.length);
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			//comprime a imagem para gravar no banco
-			bitmap.compress(CompressFormat.PNG, 0, baos);
-			image.setImageBitmap(bitmap);
-			/*Intent intent = new Intent(this, DownloadService.class);
-			Messenger messenger = new Messenger(handler);
-			intent.putExtra("MESSENGER", messenger);
-			intent.setData(Uri.parse(capa));
-			intent.putExtra("urlpath", capa);
-			startService(intent); */
-
-			// pega o nome original da imagem da capa
-			//capa = capa.substring(capa.lastIndexOf("/") + 1);
-			// Log.d("capa", capa);
-			// GregorianCalendar gc=new GregorianCalendar();
-			// gc.set(Integer.parseInt(ano), 0, 1);
-			// SimpleDateFormat formatador = new
-			// SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			// String ano_tmp = formatador.format(gc.getTime());
-
-			Trimestre trimestre = new Trimestre(titulo.toString(),
-					ordem_trimestre, ano, baos.toByteArray());
-
-			dba.addTrimestre(trimestre);
-
-			// limpa a StringBuilder para o proximo titulo
-			titulo.delete(0, titulo.length());
-			// limpa a variavel
-			capa = null;
-		}
-	}
-	private byte[] getFile(String urlString) {
-		final DefaultHttpClient client = new DefaultHttpClient();
-		final HttpGet getRequest = new HttpGet(urlString);
+		//Document html = this.obtemHtml(this.obtemURLTrimestre(tipo, ano));
+		Document html;
 		try {
-			
-			HttpResponse response = client.execute(getRequest);
-			// check 200 OK for success
-			final int statusCode = response.getStatusLine().getStatusCode();
+			html = new docTask().execute(new Integer [] {tipo,ano}).get();
+			// pegando do #conteudo por haver erro de sintaxe no html do #trimestre
+			Elements trimestres = this.buscaElementos(html,
+					"#trimestres p:matches([t|T]rimestre+)");
+			Elements capas = this.buscaElementos(html, "#trimestres img");
 
-			if (statusCode != HttpStatus.SC_OK) {
-				Log.w("Download", "Erro " + statusCode
-						+ " enquanto baixa a imagem " + urlString);
-			}
-
-			final HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				InputStream in = null;
-				try {
-					// getting contents from the stream
-					in = entity.getContent();
-					byte[] bytes = leBytes(in);
-					return bytes;
-				} catch (Exception e) {
-					// TODO: handle exception
-				} finally {
-					entity.consumeContent();
-					
-				}				
+			for (int i = 0; i < trimestres.size(); i++) {
+				tmp = trimestres.get(i).text().replace('/', ' ');
+				// Log.d("trimestre", tmp);
+				StringTokenizer tokens = new StringTokenizer(tmp);
+				// 1¤ Trimestre 2011 - A Bíblia e as emoções humanas
+				// pega apenas o primeiro char de 4¤ e converte para int
+				ordem_trimestre = Integer.parseInt(Character.toString(tokens
+						.nextToken().charAt(0)));
+				tokens.nextToken(); // pula a palavra Trimestre
+				tokens.nextToken(); // pula o ano 2011
+				tokens.nextToken(); // pula o "-"
+				// junta todas as palavras que formam o título do trimestre.
+				while (tokens.hasMoreTokens()) {
+					titulo.append(tokens.nextToken() + " ");
+				}
+				titulo.deleteCharAt(titulo.length() - 1);
+				// Log.d("trimestre", String.valueOf(ordem_trimestre));
+				// Log.d("trimestre", titulo.toString());
+				// obtem o endereço absoluto da imagem no site
+				capa = capas.get(i).attr("abs:src");
 				
-			}
+				// baixa a imagem em outro processo
+				//byte[] imagemFile = getFile(capa);
+				ImageView image = (ImageView) findViewById(R.id.imageView);
+				//image.setImageBitmap(getFile(capa));
+				//Bitmap bitmap = BitmapFactory.decodeByteArray(imagemFile,0,imagemFile.length);
+				Bitmap bitmap = null;
+				try {
+					bitmap = new baixaImagemTask().execute(capa).get();
+					image.setImageBitmap(bitmap);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				//comprime a imagem para gravar no banco
+				bitmap.compress(CompressFormat.PNG, 0, baos);
+				
+				/*Intent intent = new Intent(this, DownloadService.class);
+				Messenger messenger = new Messenger(handler);
+				intent.putExtra("MESSENGER", messenger);
+				intent.setData(Uri.parse(capa));
+				intent.putExtra("urlpath", capa);
+				startService(intent); */
 
-		} catch (Exception e) {
+				// pega o nome original da imagem da capa
+				//capa = capa.substring(capa.lastIndexOf("/") + 1);
+				// Log.d("capa", capa);
+				// GregorianCalendar gc=new GregorianCalendar();
+				// gc.set(Integer.parseInt(ano), 0, 1);
+				// SimpleDateFormat formatador = new
+				// SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				// String ano_tmp = formatador.format(gc.getTime());
+
+				Trimestre trimestre = new Trimestre(titulo.toString(),
+						ordem_trimestre, ano, baos.toByteArray());
+
+				dba.addTrimestre(trimestre); 
+
+				// limpa a StringBuilder para o proximo titulo
+				titulo.delete(0, titulo.length());
+				// limpa a variavel
+				capa = null;
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
-		return null;
+		
 	}
-	private byte[] leBytes(InputStream in) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		try {
-			byte[] buffer = new byte[1024];
-			int len;
-			while ((len = in.read(buffer)) > 0) {
-				bos.write(buffer, 0, len);
-			}
-			return bos.toByteArray();
-		} finally {
-			bos.close();
-			in.close();
+	private class baixaImagemTask extends AsyncTask<String,Void,Bitmap> {
+		@Override
+		protected Bitmap doInBackground(String... urls) {
+			
+			return new Util().baixaImagem(urls[0]);
+			
 		}
+		
+		
 	}
+	
+	private class docTask extends AsyncTask<Integer,Void,Document> {
+
+	
+		@Override
+		protected Document doInBackground(Integer... params) {			
+			
+			return obtemHtml(obtemURLTrimestre(params[0], params[1]));
+			
+		}
+		
+	}
+	
+	
 	public void obtemLicao() {
 		String url = "http://cpbmais.cpb.com.br/htdocs/periodicos/licoes/jovens/2014/lj632014.html";
 		Document html = obtemHtml(url);
@@ -271,7 +267,6 @@ public class Principal extends ActionBarActivity {
 
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			this.finish();
 			System.exit(1);
@@ -319,7 +314,7 @@ public class Principal extends ActionBarActivity {
 	 *            - ex.: 2012
 	 * @return String url
 	 */
-	private String obtemURLTrimestre(int tipo, int ano) {
+	public String obtemURLTrimestre(int tipo, int ano) {
 		String url = "http://cpbmais.cpb.com.br/htdocs/periodicos/les";
 		if (tipo == ADULTO) {
 			url += ano + ".html";
@@ -344,11 +339,11 @@ public class Principal extends ActionBarActivity {
 		}
 	}
 
-	public Elements buscaElementos(Document html, String busca) throws java.lang.NullPointerException {
+	public Elements buscaElementos(Document html, String busca) {
 		return html.select(busca);
 	}
 
-	public Element buscaElemento(Document html, String busca) throws java.lang.NullPointerException {
+	public Element buscaElemento(Document html, String busca) {
 		return html.select(busca).first();
 	}
 

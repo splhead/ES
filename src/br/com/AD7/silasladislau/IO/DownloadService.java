@@ -67,8 +67,6 @@ public class DownloadService extends IntentService {
 					byte[] bytes = leBytes(in);
 					fos = openFileOutput(nomeArquivo, MODE_PRIVATE);
 					fos.write(bytes);
-				} catch (Exception e) {
-					// TODO: handle exception
 				} finally {
 					entity.consumeContent();
 					if(fos != null){
