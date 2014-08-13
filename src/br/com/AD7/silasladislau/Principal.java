@@ -318,7 +318,9 @@ public class Principal extends ActionBarActivity {
 	public Document obtemHtml(String url) {
 		try {
 			// obtem o html do endereço
-			Document doc = Jsoup.connect(url).get();
+			Document doc = Jsoup.connect(url).timeout(10000)
+					.userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21")
+					.get();
 			Log.d("obtemHTML", "Abrindo " + url);
 
 			return doc;

@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:paddingBottom="4dip">
+    
+    <ImageView
+        android:id="@+id/ivCapa"
+        
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"        
+
+        android:src="@drawable/ic_launcher"
+        android:contentDescription="Capa do guia"
+         />
+
+    <TextView  
+        android:id="@+id/tvTitulo"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dip"
+        
+        android:layout_below="@id/ivCapa"
+        android:layout_centerInParent="true"       
+       
+        android:text="@string/titulo"
+        android:textStyle="bold" />
+    
+    <TextView  
+        android:id="@+id/tvTrimestre"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        
+        android:layout_below="@id/tvTitulo"
+        android:layout_centerInParent="true"       
+       
+        android:text="@string/trimestre"
+        android:textSize="12sp" />
+
+
+     <ImageView
+         android:id="@+id/ivOverflow"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         
+         android:layout_alignParentRight="true"
+         android:layout_alignTop="@+id/tvTitulo"
+         
+         android:contentDescription="icone"
+         android:src="@drawable/ic_action_overflow" />
+
+</RelativeLayout>
