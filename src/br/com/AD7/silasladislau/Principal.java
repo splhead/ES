@@ -17,6 +17,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -30,6 +32,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,7 +72,23 @@ public class Principal extends ActionBarActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		//setContentView(R.layout.main);
+		setContentView(R.layout.activity_grid_trim);
+
+		/*final Cursor c = dba.buscaTrimestres(ano);
+		startManagingCursor(c);
+
+		final GridView gvCapas = (GridView) findViewById(R.id.gvCapas);
+
+		String[] cols = new String[] { "titulo", "ordem_trimestre", "capa" };
+		int[] nomes = new int[] { R.id.tvTitulo, R.id.tvTrimestre, R.id.ivCapa };
+
+		TrimestreAdapter adapter = new TrimestreAdapter(this,
+				R.layout.grid_item, c, cols, nomes);
+
+		gvCapas.setAdapter(adapter);*/
+		Intent intent = new Intent(getApplicationContext(), GridActivity.class);
+		startActivity(intent);
 
 		// if (new Util().internetDisponivel(this)) {
 		

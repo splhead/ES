@@ -25,6 +25,10 @@ public class Trimestre {
 		this.capa = capa;
 	}
 	
+	public Trimestre() {
+		
+	}
+	
 	public long get_id() {
 		return id;
 	}
