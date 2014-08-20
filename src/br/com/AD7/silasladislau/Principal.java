@@ -46,7 +46,7 @@ public class Principal extends ActionBarActivity {
 	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
 	private String capa, tmp;
 	private static final int ADULTO = 0, JOVEM = 1;
-	private int ordem_trimestre, ano = 2014, tipo = JOVEM; // ano e tipo para
+	private int ordem_trimestre, ano, tipo = ADULTO; // ano e tipo para
 															// teste !!!!
 															// remover!!!
 	private Object path;
@@ -72,9 +72,17 @@ public class Principal extends ActionBarActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//setContentView(R.layout.main);
-		setContentView(R.layout.activity_grid_trim);
-
+		setContentView(R.layout.main);
+		//setContentView(R.layout.activity_grid_trim);
+		try {
+			new docTask().execute(tipo,2014).get();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		/*final Cursor c = dba.buscaTrimestres(ano);
 		startManagingCursor(c);
 
@@ -174,22 +182,27 @@ public class Principal extends ActionBarActivity {
 
 				for (int i = 0; i < trimestres.size(); i++) {
 					tmp = trimestres.get(i).text().replace('/', ' ');
-					// Log.d("trimestre", tmp);
+//					Log.d("trimestre", trimestres.get(i).text());
 					StringTokenizer tokens = new StringTokenizer(tmp);
-					// 1¤ Trimestre 2011 - A Bíblia e as emoções humanas
+					// 1¤ Trimestre de 2011 A Bíblia e as emoções humanas
 					// pega apenas o primeiro char de 4¤ e converte para int
 					ordem_trimestre = Integer.parseInt(Character
 							.toString(tokens.nextToken().charAt(0)));
 					tokens.nextToken(); // pula a palavra Trimestre
-					tokens.nextToken(); // pula o ano 2011
-					tokens.nextToken(); // pula o "-"
+					tokens.nextToken(); // pula o "de"
+					ano = Integer.parseInt(tokens.nextToken()); // pula o "2011"
 					// junta todas as palavras que formam o título do trimestre.
-					while (tokens.hasMoreTokens()) {
-						titulo.append(tokens.nextToken() + " ");
+					if (tokens.hasMoreTokens()) {
+						while (tokens.hasMoreTokens()) {
+							titulo.append(tokens.nextToken() + " ");
+						}
+					} else if (trimestres.get(i).nextElementSibling().hasText()) {
+						titulo.append(trimestres.get(i).nextElementSibling().text());
 					}
-					titulo.deleteCharAt(titulo.length() - 1);
+								
+					
 					// Log.d("trimestre", String.valueOf(ordem_trimestre));
-					// Log.d("trimestre", titulo.toString());
+					Log.d("trimestre", titulo.toString());
 					// obtem o endereço absoluto da imagem no site
 					capa = capas.get(i).attr("abs:src");
 
@@ -371,7 +384,7 @@ public class Principal extends ActionBarActivity {
 		int trimestreAtual = 0;
 		Document doc = this.obtemHtml(obtemURLTrimestre(tipo, ano));
 		Elements trimestres = this.buscaElementos(doc,
-				"#conteudo p:matches([t|T]rimestre+)");
+				"#trimestres p:matches([t|T]rimestre+)");
 		for (int i = 0; i < trimestres.size(); i++) {
 			tmp = trimestres.get(i).text().replace('/', ' ');
 			Log.d("trimestreAtual", tmp);
