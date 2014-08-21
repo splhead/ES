@@ -75,7 +75,7 @@ public class Principal extends ActionBarActivity {
 		setContentView(R.layout.main);
 		//setContentView(R.layout.activity_grid_trim);
 		try {
-			new docTask().execute(tipo,2013).get();
+			new docTask().execute(tipo,2014).get();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -96,6 +96,7 @@ public class Principal extends ActionBarActivity {
 
 		gvCapas.setAdapter(adapter);*/
 		Intent intent = new Intent(getApplicationContext(), GridActivity.class);
+		intent.putExtra("tipo", tipo);
 		startActivity(intent);
 
 		// if (new Util().internetDisponivel(this)) {
@@ -246,7 +247,7 @@ public class Principal extends ActionBarActivity {
 					// String ano_tmp = formatador.format(gc.getTime());
 
 					Trimestre trimestre = new Trimestre(titulo.toString(),
-							ordem_trimestre, ano, baos.toByteArray());
+							ordem_trimestre, ano, tipo, baos.toByteArray());
 
 					dba.addTrimestre(trimestre);
 

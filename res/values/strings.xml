@@ -4,6 +4,7 @@
     <string name="titulo">Hello World!</string>
     <string name="trimestre">2º Trim. de 2014</string>
     <string name="action_refresh">Atualizar</string>
+    <string name="action_overflow">Sobre</string>
     <string name="app_name">Guia</string>
     <string name="title_activity_grid_trim">GridTrimActivity</string>
     <string name="hello_world">Hello world!</string>

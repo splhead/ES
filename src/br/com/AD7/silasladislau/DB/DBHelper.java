@@ -15,9 +15,10 @@ public class DBHelper extends SQLiteOpenHelper {
 			"CREATE TABLE IF NOT EXISTS trimestre ("
 					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ "titulo TEXT NOT NULL, ordem_trimestre INTEGER NOT NULL,"
-					+ "ano INTEGER NOT NULL," + "capa BLOB NOT NULL" +
+					+ "ano INTEGER NOT NULL," + "tipo INTEGER NOT NULL,"
+					+ "capa BLOB NOT NULL"
 					// "PRIMARY KEY(ordem_trimestre,ano)" +
-					");",
+					+ ");",
 			"CREATE TABLE IF NOT EXISTS licao("
 					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ "data_inicial NUMERIC NOT NULL,"

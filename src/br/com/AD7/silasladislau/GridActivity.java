@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -28,8 +29,13 @@ public class GridActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_grid_trim);
+		
+		//pega o tipo passado pela atividade principal
+		Intent intent = getIntent();
+		int tipo = intent.getIntExtra("tipo", 1); //padrao JOVEM
+		Log.d(getClass().getName(), String.valueOf(tipo));
 
-		final List<Trimestre> t = dba.buscaTodosTrimestres();
+		final List<Trimestre> t = dba.buscaTodosTrimestres(tipo);
 		//startManagingCursor(c);
 		
 

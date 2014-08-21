@@ -4,24 +4,25 @@ package br.com.AD7.silasladislau;
 public class Trimestre {
 	private long id;
 	private String titulo;
-	private int ordem_trimestre;
-	private int ano;
+	private int ordem_trimestre, ano, tipo;
 	private byte[] capa;
 	
-	public Trimestre(String titulo, int ordem_trimestre, int ano, byte[] capa){
+	public Trimestre(String titulo, int ordem_trimestre, int ano, int tipo, byte[] capa){
 		super();
 		this.titulo = titulo;
 		this.ordem_trimestre = ordem_trimestre;
 		this.ano = ano;
+		this.tipo = tipo;
 		this.capa = capa;
 	}
 	
-	public Trimestre(long id,String titulo, int ordem_trimestre, int ano, byte[] capa){
+	public Trimestre(long id,String titulo, int ordem_trimestre, int ano, int tipo, byte[] capa){
 		super();
 		this.id = id;
 		this.titulo = titulo;
 		this.ordem_trimestre = ordem_trimestre;
 		this.ano = ano;
+		this.tipo = tipo;
 		this.capa = capa;
 	}
 	
@@ -55,6 +56,14 @@ public class Trimestre {
 	public void setAno(int ano) {
 		this.ano = ano;
 	}
+	public int getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(int tipo) {
+		this.tipo = tipo;
+	}
+
 	public byte[] getCapa() {
 		return capa;
 	}
@@ -63,6 +72,6 @@ public class Trimestre {
 	}
 	public String toString(){		
 		return getOrdemTrimestre()+ "º Trimestre Titulo: " + getTitulo() + " Ano: " +
-		getAno();
+		getAno() + " tipo: " + getTipo();
 	}
 }

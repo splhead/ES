@@ -16,6 +16,7 @@ public class TrimestreDBAdapter extends DBAdapter {
 	public static final String TITULO = "titulo";
 	public static final String ORDEM_TRIMESTRE = "ordem_trimestre";
 	public static final String ANO = "ano";
+	public static final String TIPO = "tipo"; //JOVEM OU ADULTO
 	public static final String CAPA = "capa";
 	private static final String BD_TABELA = "trimestre";
 
@@ -35,6 +36,7 @@ public class TrimestreDBAdapter extends DBAdapter {
 		valores.put(TITULO, trimestre.getTitulo());
 		valores.put(ORDEM_TRIMESTRE, trimestre.getOrdemTrimestre());
 		valores.put(ANO, trimestre.getAno());
+		valores.put(TIPO, trimestre.getTipo());
 		valores.put(CAPA, trimestre.getCapa());
 		Log.i(getClass().getName(), "Gravando: " + trimestre.toString());
 
@@ -58,14 +60,14 @@ public class TrimestreDBAdapter extends DBAdapter {
 
 	private Trimestre trimestre(int ordemTrimestre, int ano) {
 		Cursor c = bancoDados.query(true, BD_TABELA, new String[] { ROWID,
-				TITULO, ORDEM_TRIMESTRE, ANO, CAPA }, ORDEM_TRIMESTRE + "="
+				TITULO, ORDEM_TRIMESTRE, ANO, TIPO, CAPA }, ORDEM_TRIMESTRE + "="
 				+ ordemTrimestre + " AND ano =" + ano, null, null, null, null,
 				null);
 		try {
 			if (c.getCount() > 0) {
 				c.moveToFirst();
 				Trimestre trimestre = new Trimestre(c.getLong(0),
-						c.getString(1), c.getInt(2), c.getInt(3), c.getBlob(4));
+						c.getString(1), c.getInt(2), c.getInt(3), c.getInt(4), c.getBlob(5));
 
 				Log.d(getClass().getName(), trimestre.toString());
 				return trimestre;
@@ -96,10 +98,11 @@ public class TrimestreDBAdapter extends DBAdapter {
 		}
 	}
 
-	private Cursor trimestres(int ano) {
+	private Cursor trimestres(int ano, int tipo) {
 		try {
 			Cursor c = bancoDados.query(true, BD_TABELA, new String[] { ROWID,
-					TITULO, ORDEM_TRIMESTRE, ANO, CAPA }, "ano =" + ano, null,
+					TITULO, ORDEM_TRIMESTRE, ANO, TIPO, CAPA },
+					"ano =" + ano + " AND tipo=" + tipo , null,
 					null, null, null, null);
 			return c;
 		} catch (SQLException e) {
@@ -114,19 +117,20 @@ public class TrimestreDBAdapter extends DBAdapter {
 	 * @param ano
 	 * @return Cursor
 	 */
-	public Cursor buscaTrimestres(int ano) {
+	public Cursor buscaTrimestres(int ano, int tipo) {
 		try {
 			abrir();
-			return trimestres(ano);
+			return trimestres(ano, tipo);
 		} finally {
 			fechar();
 		}
 	}
 
-	private List<Trimestre> todosTrimestres() {
+	private List<Trimestre> todosTrimestres(int tipo) {
 		List<Trimestre> trimestreList = new ArrayList<Trimestre>();
 		// Select All Query
-		String selectQuery = "SELECT  * FROM " + BD_TABELA + " ORDER BY "
+		String selectQuery = "SELECT  * FROM " + BD_TABELA 
+				+ " WHERE tipo=" + tipo +" ORDER BY "
 				+ ANO + " DESC";
 
 		Cursor c = null;
@@ -150,6 +154,9 @@ public class TrimestreDBAdapter extends DBAdapter {
 					trimestre.setAno(c.getInt(c.getColumnIndex(ANO)));
 //					Log.d(getClass().getName(),
 //							String.valueOf(trimestre.getAno()));
+					trimestre.setTipo(c.getInt(c.getColumnIndex(TIPO)));
+//					Log.d(getClass().getName(),
+//					String.valueOf(trimestre.getTipo()));
 					trimestre.setCapa(c.getBlob(c.getColumnIndex(CAPA)));
 //					Log.d(getClass().getName(),
 //							String.valueOf(trimestre.getCapa()));
@@ -173,10 +180,10 @@ public class TrimestreDBAdapter extends DBAdapter {
 	 * 
 	 * @return List<Trimestre>
 	 */
-	public List<Trimestre> buscaTodosTrimestres() {
+	public List<Trimestre> buscaTodosTrimestres(int tipo) {
 		try {
 			abrir();
-			return todosTrimestres();
+			return todosTrimestres(tipo);
 		} finally {
 			fechar();
 		}
