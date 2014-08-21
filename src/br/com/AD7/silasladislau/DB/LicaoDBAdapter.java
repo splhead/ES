@@ -10,6 +10,7 @@ public class LicaoDBAdapter extends DBAdapter {
 	public static final String DATA = "data";
 	public static final String TITULO = "titulo";
 	public static final String TRIMESTREID = "trimestreId";
+	private static final String CAPA = "capa";
 	private static final String BD_TABELA = "licao";
 	
 	public LicaoDBAdapter (Context contexto) {
@@ -21,6 +22,7 @@ public class LicaoDBAdapter extends DBAdapter {
 		valores.put(DATA, licao.getData());
 		valores.put(TITULO, licao.getTitulo());
 		valores.put(TRIMESTREID, licao.getTrimestreId());
+		valores.put(CAPA, licao.getCapa());
 		Log.i(getClass().getName(), "Gravando: " + licao.toString());
 		return bancoDados.insert(BD_TABELA, null, valores);
 	}
@@ -37,5 +39,5 @@ public class LicaoDBAdapter extends DBAdapter {
 		finally {
 			fechar();
 		}
-	}
+	}	
 }

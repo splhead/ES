@@ -5,20 +5,23 @@ public class Licao {
 	private String data;
 	private String titulo;
 	private int trimestreId;
+	private byte[] capa;
 	
-	public Licao(long id, String data, String titulo, int trimestreId) {
+	public Licao(long id, String data, String titulo, int trimestreId, byte[] capa) {
 		super();
 		this.id = id;
 		this.data = data;
 		this.titulo = titulo;
 		this.trimestreId = trimestreId;
+		this.capa = capa;
 	}
 	
-	public Licao(String data, String titulo, int trimestreId) {
+	public Licao(String data, String titulo, int trimestreId, byte[] capa) {
 		super();
 		this.data = data;
 		this.titulo = titulo;
 		this.trimestreId = trimestreId;
+		this.capa = capa;
 	}
 	
 	
@@ -54,6 +57,14 @@ public class Licao {
 		this.trimestreId = trimestreId;
 	}
 	
+	public byte[] getCapa() {
+		return capa;
+	}
+
+	public void setCapa(byte[] capa) {
+		this.capa = capa;
+	}
+
 	public String toString() {
 		return this.getTitulo() + " " + this.getData() + " " + this.trimestreId;
 	}

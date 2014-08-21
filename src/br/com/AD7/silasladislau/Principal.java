@@ -46,7 +46,7 @@ public class Principal extends ActionBarActivity {
 	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
 	private String capa, tmp;
 	private static final int ADULTO = 0, JOVEM = 1;
-	private int ordem_trimestre, ano = 2012, tipo = JOVEM; // ano e tipo para
+	private int ordem_trimestre, ano = 2012, tipo = ADULTO; // ano e tipo para
 															// teste !!!!
 															// remover!!!
 	private Object path;
@@ -68,28 +68,18 @@ public class Principal extends ActionBarActivity {
 		};
 	};
 
-	@SuppressLint("NewApi")
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		//setContentView(R.layout.activity_grid_trim);
 		obtemTrimestres(tipo, ano);
-		/*final Cursor c = dba.buscaTrimestres(ano);
-		startManagingCursor(c);
-
-		final GridView gvCapas = (GridView) findViewById(R.id.gvCapas);
-
-		String[] cols = new String[] { "titulo", "ordem_trimestre", "capa" };
-		int[] nomes = new int[] { R.id.tvTitulo, R.id.tvTrimestre, R.id.ivCapa };
-
-		TrimestreAdapter adapter = new TrimestreAdapter(this,
-				R.layout.grid_item, c, cols, nomes);
-
-		gvCapas.setAdapter(adapter);*/
+		
 		Intent intent = new Intent(getApplicationContext(), GridActivity.class);
 		intent.putExtra("tipo", tipo);
 		startActivity(intent);
+		
 
 		// if (new Util().internetDisponivel(this)) {
 		
@@ -187,6 +177,8 @@ public class Principal extends ActionBarActivity {
 				Elements capas = buscaElementos(html, "#trimestres img");
 
 				for (int i = 0; i < trimestres.size(); i++) {
+					// TODO pegar urls de cada lição referente a cada trimestre
+					
 					tmp = trimestres.get(i).text().replace('/', ' ');
 //					Log.d("trimestre", trimestres.get(i).text());
 					StringTokenizer tokens = new StringTokenizer(tmp);
@@ -226,9 +218,9 @@ public class Principal extends ActionBarActivity {
 					try {
 						Bitmap bitmap = new baixaImagemTask().execute(capa).get();//new Util().baixaImagem(capa);
 						//image.setImageBitmap(bitmap);
-						if (bitmap == null) {
+						/*if (bitmap == null) {
 							Log.d("capa", "vazio");
-						}
+						}*/
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						// comprime a imagem para gravar no banco
 						bitmap.compress(CompressFormat.PNG, 100, baos);

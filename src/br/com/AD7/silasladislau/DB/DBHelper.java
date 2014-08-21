@@ -22,9 +22,9 @@ public class DBHelper extends SQLiteOpenHelper {
 			"CREATE TABLE IF NOT EXISTS licao("
 					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ "data_inicial NUMERIC NOT NULL,"
-					+ "titulo TEXT NOT NULL,"
-					+ "capa BLOB NOT NULL,"
+					+ "titulo TEXT NOT NULL,"					
 					+ "trimestre_id INTEGER NOT NULL,"
+					+ "capa BLOB NOT NULL,"
 					+ "FOREIGN KEY(trimestre_id) REFERENCES trimestre(_id)"
 					+ ");",
 			"CREATE TABLE IF NOT EXISTS dia("
@@ -32,7 +32,15 @@ public class DBHelper extends SQLiteOpenHelper {
 					+ "dia NUMERIC NOT NULL," + "titulo TEXT NOT NULL,"
 					+ "texto TEXT NOT NULL,"
 					+ "licao_id INTEGER NOT NULL,"
-					+ "FOREIGN KEY(licao_id) REFERENCES licao(_id)" + ");", };
+					+ "FOREIGN KEY(licao_id) REFERENCES licao(_id)"
+					+ ");",
+			"CREATE TABLE IF NOT EXISTS resposta("
+					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+					+ "texto TEXT NOT NULL,"
+					+ "dia_id INTEGER NOT NULL,"
+					+ "FOREIGN KEY(dia_id) REFERENCES dia(_id)"
+					+ ");"
+	};
 
 	public DBHelper(Context contexto) {
 		super(contexto, NOME_BANCO_DADOS, null, VERSAO_BANCO_DADOS);
