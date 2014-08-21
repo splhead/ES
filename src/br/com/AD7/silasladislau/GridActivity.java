@@ -1,5 +1,6 @@
 package br.com.AD7.silasladislau;
 
+import java.util.Iterator;
 import java.util.List;
 
 import android.annotation.SuppressLint;
@@ -37,6 +38,11 @@ public class GridActivity extends ActionBarActivity {
 
 		final List<Trimestre> t = dba.buscaTodosTrimestres(tipo);
 		//startManagingCursor(c);
+		Iterator<Trimestre> i = t.iterator();
+		while (i.hasNext()) {
+			Trimestre trimestre = (Trimestre) i.next();
+			Log.d("grid", trimestre.toString());
+		}
 		
 
 		final GridView gvCapas = (GridView) findViewById(R.id.gvCapas);

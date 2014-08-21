@@ -46,7 +46,7 @@ public class Principal extends ActionBarActivity {
 	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
 	private String capa, tmp;
 	private static final int ADULTO = 0, JOVEM = 1;
-	private int ordem_trimestre, ano, tipo = ADULTO; // ano e tipo para
+	private int ordem_trimestre, ano = 2012, tipo = JOVEM; // ano e tipo para
 															// teste !!!!
 															// remover!!!
 	private Object path;
@@ -74,15 +74,7 @@ public class Principal extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		//setContentView(R.layout.activity_grid_trim);
-		try {
-			new docTask().execute(tipo,2014).get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		obtemTrimestres(tipo, ano);
 		/*final Cursor c = dba.buscaTrimestres(ano);
 		startManagingCursor(c);
 
@@ -161,6 +153,14 @@ public class Principal extends ActionBarActivity {
 
 		}
 
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			ImageView image = (ImageView) findViewById(R.id.imageView);
+			image.setImageBitmap(result);
+		}
+		
+		
+
 	}
 
 	private class docTask extends AsyncTask<Integer, Void, Document> {
@@ -172,8 +172,13 @@ public class Principal extends ActionBarActivity {
 
 		}
 		
-		protected void onPostExecute(Document html) {
-			String tmp;
+	}
+	
+	@SuppressLint("NewApi")
+	public void obtemTrimestres(int tipo, int ano) {
+		Document html;
+		try {
+			html = new docTask().execute(tipo,ano).get();
 			if (html != null) {
 				// pegando do #conteudo por haver erro de sintaxe no html do
 				// #trimestre
@@ -213,21 +218,30 @@ public class Principal extends ActionBarActivity {
 
 					// baixa a imagem em outro processo
 					// byte[] imagemFile = getFile(capa);
-					ImageView image = (ImageView) findViewById(R.id.imageView);
+					//ImageView image = (ImageView) findViewById(R.id.imageView);
 					// image.setImageBitmap(getFile(capa));
 					// Bitmap bitmap =
 					// BitmapFactory.decodeByteArray(imagemFile,0,imagemFile.length);
-					Bitmap bitmap = null;
+					//Bitmap bitmap = null;
 					try {
-						bitmap = new baixaImagemTask().execute(capa).get();
+						Bitmap bitmap = new baixaImagemTask().execute(capa).get();//new Util().baixaImagem(capa);
+						//image.setImageBitmap(bitmap);
+						if (bitmap == null) {
+							Log.d("capa", "vazio");
+						}
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						// comprime a imagem para gravar no banco
+						bitmap.compress(CompressFormat.PNG, 100, baos);
+						
+						Trimestre trimestre = new Trimestre(titulo.toString(),
+								ordem_trimestre, ano, tipo, baos.toByteArray());
+
+						dba.addTrimestre(trimestre);
 
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					image.setImageBitmap(bitmap);
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					// comprime a imagem para gravar no banco
-					bitmap.compress(CompressFormat.PNG, 0, baos);
+					
 
 					/*
 					 * Intent intent = new Intent(this, DownloadService.class);
@@ -246,10 +260,7 @@ public class Principal extends ActionBarActivity {
 					// SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					// String ano_tmp = formatador.format(gc.getTime());
 
-					Trimestre trimestre = new Trimestre(titulo.toString(),
-							ordem_trimestre, ano, tipo, baos.toByteArray());
-
-					dba.addTrimestre(trimestre);
+					
 
 					// limpa a StringBuilder para o proximo titulo
 					titulo.delete(0, titulo.length());
@@ -257,8 +268,14 @@ public class Principal extends ActionBarActivity {
 					capa = null;
 				}
 			}
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ExecutionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-
+		
 	}
 
 	public void obtemLicao() {
@@ -354,6 +371,7 @@ public class Principal extends ActionBarActivity {
 
 	public Document obtemHtml(String url) {
 		try {
+			System.setProperty("http.keepAlive", "false");
 			// obtem o html do endereço
 			Document doc = Jsoup.connect(url).timeout(10000)
 					.userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1042.0 Safari/535.21")

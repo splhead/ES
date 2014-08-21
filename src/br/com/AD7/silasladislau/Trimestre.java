@@ -70,8 +70,9 @@ public class Trimestre {
 	public void setCapa(byte[] capa) {
 		this.capa = capa;
 	}
-	public String toString(){		
+	public String toString(){
+		String t = getTipo() == 0? "adulto":"jovens";
 		return getOrdemTrimestre()+ "º Trimestre Titulo: " + getTitulo() + " Ano: " +
-		getAno() + " tipo: " + getTipo();
+		getAno() + " tipo: " + t;
 	}
 }

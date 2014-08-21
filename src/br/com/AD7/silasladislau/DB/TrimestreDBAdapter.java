@@ -26,7 +26,7 @@ public class TrimestreDBAdapter extends DBAdapter {
 
 	private long add(Trimestre trimestre) {
 		// verifica se o registro já exite no banco
-		if (this.trimestre(trimestre.getOrdemTrimestre(), trimestre.getAno()) != null) {
+		if (this.trimestre(trimestre.getOrdemTrimestre(), trimestre.getAno(), trimestre.getTipo()) != null) {
 			Log.w(getClass().getName(),
 					"O trimestre já existe e não será gravado.");
 			return -1;
@@ -58,10 +58,11 @@ public class TrimestreDBAdapter extends DBAdapter {
 		}
 	}
 
-	private Trimestre trimestre(int ordemTrimestre, int ano) {
+	private Trimestre trimestre(int ordemTrimestre, int ano, int tipo) {
 		Cursor c = bancoDados.query(true, BD_TABELA, new String[] { ROWID,
 				TITULO, ORDEM_TRIMESTRE, ANO, TIPO, CAPA }, ORDEM_TRIMESTRE + "="
-				+ ordemTrimestre + " AND ano =" + ano, null, null, null, null,
+				+ ordemTrimestre + " AND ano =" + ano + " AND tipo=" + tipo
+				, null, null, null, null,
 				null);
 		try {
 			if (c.getCount() > 0) {
@@ -89,10 +90,10 @@ public class TrimestreDBAdapter extends DBAdapter {
 	 * @param int ano
 	 * @return Trimestre
 	 */
-	public Trimestre buscaTrimestre(int ordemTrimestre, int ano) {
+	public Trimestre buscaTrimestre(int ordemTrimestre, int ano, int tipo) {
 		try {
 			abrir();
-			return trimestre(ordemTrimestre, ano);
+			return trimestre(ordemTrimestre, ano, tipo);
 		} finally {
 			fechar();
 		}
