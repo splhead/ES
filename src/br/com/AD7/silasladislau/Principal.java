@@ -75,7 +75,7 @@ public class Principal extends ActionBarActivity {
 		setContentView(R.layout.main);
 		//setContentView(R.layout.activity_grid_trim);
 		try {
-			new docTask().execute(tipo,2014).get();
+			new docTask().execute(tipo,2013).get();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -192,6 +192,10 @@ public class Principal extends ActionBarActivity {
 					tokens.nextToken(); // pula o "de"
 					ano = Integer.parseInt(tokens.nextToken()); // pula o "2011"
 					// junta todas as palavras que formam o título do trimestre.
+					
+					//correção do problema
+					//<p>3º trimestre de 2014</p>
+					//<p>Ensinos de Jesus</p>
 					if (tokens.hasMoreTokens()) {
 						while (tokens.hasMoreTokens()) {
 							titulo.append(tokens.nextToken() + " ");
@@ -202,7 +206,7 @@ public class Principal extends ActionBarActivity {
 								
 					
 					// Log.d("trimestre", String.valueOf(ordem_trimestre));
-					Log.d("trimestre", titulo.toString());
+					//Log.d("trimestre", titulo.toString());
 					// obtem o endereço absoluto da imagem no site
 					capa = capas.get(i).attr("abs:src");
 

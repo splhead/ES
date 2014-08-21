@@ -3,13 +3,15 @@ package br.com.AD7.silasladislau;
 import java.util.List;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -18,10 +20,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
 
-public class GridActivity extends Activity {
+public class GridActivity extends ActionBarActivity {
 	// private List<Trimestre> trimestres = null;
 	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
-	private final int ANO = 2014;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,48 @@ public class GridActivity extends Activity {
 		final GridView gvCapas = (GridView) findViewById(R.id.gvCapas);
 		
 		gvCapas.setAdapter(new TrimestreGridAdapter(this, t));
+		
+		/**
+         * On Click event for Single Gridview Item
+         * */
+        /*gridView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v,
+                    int position, long id) {
+ 
+                // Sending image id to FullScreenActivity
+                Intent i = new Intent(getApplicationContext(), FullImageActivity.class);
+                // passing array index
+                i.putExtra("id", position);
+                startActivity(i);
+            }
+        });*/
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu items for use in the action bar
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.principal, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	/*
+	 * @Override public boolean onCreateOptionsMenu(Menu menu) { // Inflate the
+	 * menu; this adds items to the action bar if it is present.
+	 * getMenuInflater().inflate(R.menu.principal, menu); return true; }
+	 */
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle presses on the action bar items
+		switch (item.getItemId()) {
+		case R.id.action_refresh:
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	public class TrimestreGridAdapter extends BaseAdapter {
@@ -70,34 +113,33 @@ public class GridActivity extends Activity {
 		@Override
 		public View getView(int posicao, View convertView, ViewGroup parent) {
 			ViewHolder holder = null;
-			//ImageView imageView;
 			
 			LayoutInflater inflater = (LayoutInflater) mContext
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			if (convertView == null) {
 				convertView = inflater.inflate(R.layout.grid_item, null);
 				holder = new ViewHolder();
-
-				holder.ivCapa = (ImageView) convertView.findViewById(R.id.ivCapa);
-				holder.tvTitulo = (TextView) convertView.findViewById(R.id.tvTitulo);
-				holder.tvTrimestre = (TextView) convertView.findViewById(R.id.tvTrimestre);
-
-				Trimestre trimestre_pos = trimestres.get(posicao);
-				//Log.d(getClass().getName(), trimestre_pos.toString());
-
-				holder.ivCapa.setImageBitmap(BitmapFactory.decodeByteArray(
-						trimestre_pos.getCapa(), 0,
-						trimestre_pos.getCapa().length));
-
-				holder.tvTitulo.setText(trimestre_pos.getTitulo());
-
-				holder.tvTrimestre.setText(trimestre_pos.getOrdemTrimestre()
-						+ "º trimestre de " + trimestre_pos.getAno());
-
-				convertView.setTag(holder);
+				
 			} else {
-				holder = (ViewHolder) convertView.getTag();
-			}
+				holder = (ViewHolder) convertView.getTag();				
+			}			
+
+			holder.ivCapa = (ImageView) convertView.findViewById(R.id.ivCapa);
+			holder.tvTitulo = (TextView) convertView.findViewById(R.id.tvTitulo);
+			holder.tvTrimestre = (TextView) convertView.findViewById(R.id.tvTrimestre);
+
+			Trimestre trimestre_pos = trimestres.get(posicao);
+			
+			holder.ivCapa.setImageBitmap(BitmapFactory.decodeByteArray(
+					trimestre_pos.getCapa(), 0,
+					trimestre_pos.getCapa().length));
+
+			holder.tvTitulo.setText(trimestre_pos.getTitulo());
+
+			holder.tvTrimestre.setText(trimestre_pos.getOrdemTrimestre()
+					+ "º trimestre de " + trimestre_pos.getAno());
+
+			convertView.setTag(holder);
 			return convertView;
 		}
 	}

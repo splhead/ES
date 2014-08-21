@@ -126,14 +126,16 @@ public class TrimestreDBAdapter extends DBAdapter {
 	private List<Trimestre> todosTrimestres() {
 		List<Trimestre> trimestreList = new ArrayList<Trimestre>();
 		// Select All Query
-		String selectQuery = "SELECT  * FROM " + BD_TABELA;
+		String selectQuery = "SELECT  * FROM " + BD_TABELA + " ORDER BY "
+				+ ANO + " DESC";
 
 		Cursor c = null;
 		try {
 			c = bancoDados.rawQuery(selectQuery, null);
 
 			// looping through all rows and adding to list
-			if (c.moveToFirst()) {
+			if (c.getCount() > 0) {
+				c.moveToFirst();
 				do {
 					Trimestre trimestre = new Trimestre();
 					trimestre.set_id(c.getLong(c.getColumnIndex(ROWID)));

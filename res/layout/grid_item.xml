@@ -1,44 +1,46 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="142dp"
+    android:layout_height="230dp"
     android:background="#ffffff"
-    android:paddingBottom="4dip">
+    >
     
     <ImageView
         android:id="@+id/ivCapa"
         
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="176dp"
+        android:layout_alignParentTop="true"
 
         android:src="@drawable/ic_launcher"
         android:contentDescription="Capa do guia"
+        android:layout_marginBottom="8dp"
          />
-
+    
     <TextView  
         android:id="@+id/tvTitulo"
 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dip"
+        android:layout_width="105dp"
+        android:layout_height="18dp"
+        android:layout_marginLeft="8dp"
         
         android:layout_below="@id/ivCapa"
-        android:layout_centerInParent="true"
         android:ellipsize="marquee"     
        
         android:text="@string/titulo"
+        android:textSize="12sp"
         android:textStyle="bold" />
     
     <TextView  
         android:id="@+id/tvTrimestre"
 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" 
+        android:layout_width="105dp"
+        android:layout_height="18dp"
+        android:layout_marginLeft="8dp" 
         
-        android:layout_below="@id/tvTitulo"
-        android:layout_centerInParent="true"       
-       
+        android:layout_below="@id/tvTitulo"   
+   
         android:text="@string/trimestre"
-        android:textSize="12sp" />
+        android:textSize="10sp" />
 
 
      <ImageView
@@ -48,6 +50,7 @@
          
          android:layout_alignParentRight="true"
          android:layout_alignTop="@+id/tvTitulo"
+         android:layout_below="@+id/ivCapa"
          
          android:contentDescription="icone"
          android:src="@drawable/ic_action_overflow" />

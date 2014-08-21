@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"    
     android:padding="8dp"
-    
+    android:background="#cccccc"
     tools:context="${relativePackage}.${activityClass}" >
     
     <GridView 
@@ -13,8 +13,8 @@
     android:layout_height="match_parent"
     android:columnWidth="130dp"
     android:numColumns="auto_fit"
-    android:verticalSpacing="10dp"
-    android:horizontalSpacing="10dp"
+    android:verticalSpacing="8dp"
+    android:horizontalSpacing="8dp"
     android:stretchMode="columnWidth"
     android:gravity="center"
 />
