@@ -54,6 +54,6 @@
          
          android:contentDescription="icone"
          android:background="@null"
-         android:src="@drawable/ic_action_overflow" />
+         android:src="@drawable/ic_action_overflow_l" />
 
 </RelativeLayout>
