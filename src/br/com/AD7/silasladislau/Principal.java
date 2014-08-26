@@ -46,7 +46,7 @@ public class Principal extends ActionBarActivity {
 	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
 	private String capa, tmp;
 	private static final int ADULTO = 0, JOVEM = 1;
-	private int ordem_trimestre, ano = 2012, tipo = ADULTO; // ano e tipo para
+	private int ordem_trimestre, ano = 2014, tipo = ADULTO; // ano e tipo para
 															// teste !!!!
 															// remover!!!
 	private Object path;
@@ -164,7 +164,7 @@ public class Principal extends ActionBarActivity {
 		
 	}
 	
-	@SuppressLint("NewApi")
+	
 	public void obtemTrimestres(int tipo, int ano) {
 		Document html;
 		try {
@@ -258,6 +258,17 @@ public class Principal extends ActionBarActivity {
 					titulo.delete(0, titulo.length());
 					// limpa a variavel
 					capa = null;
+					
+					//pega o link das lições do trimestre
+					int nLicao = 1;
+					Elements linkLicoes = buscaElementos(html,
+							"div#conteudo a[href~="+ ordem_trimestre + ano +"]");
+					for (Element link : linkLicoes) {
+						Log.d("oT link licao", link.attr("abs:href") + " - " 
+								+ String.valueOf(nLicao) + " " + link.text());
+						nLicao++;
+						new LicaoTask().execute(link.attr("abs:href"));
+					}
 				}
 			}
 		} catch (InterruptedException e1) {
@@ -269,9 +280,18 @@ public class Principal extends ActionBarActivity {
 		}
 		
 	}
+	public class LicaoTask extends AsyncTask<String, Void, Void> {
 
-	public void obtemLicao() {
-		String url = "http://cpbmais.cpb.com.br/htdocs/periodicos/licoes/jovens/2014/lj632014.html";
+		@Override
+		protected Void doInBackground(String... urls) {
+			obtemLicao(urls[0]);
+			return null;
+		}
+		
+	}
+
+	private void obtemLicao(String url) {
+		//String url = "http://cpbmais.cpb.com.br/htdocs/periodicos/licoes/jovens/2014/lj632014.html";
 		Document html = obtemHtml(url);
 		// File in = new File(this.getFilesDir() + "/lj532014.html");
 		// File in = new File(this.getFilesDir() + "/licao.html");

@@ -21,7 +21,8 @@ public class DBHelper extends SQLiteOpenHelper {
 					+ ");",
 			"CREATE TABLE IF NOT EXISTS licao("
 					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-					+ "data_inicial NUMERIC NOT NULL,"
+					+ "data_inicial INTEGER NOT NULL,"
+					+ "numero INTEGER  NOT NULL,"
 					+ "titulo TEXT NOT NULL,"					
 					+ "trimestre_id INTEGER NOT NULL,"
 					+ "capa BLOB NOT NULL,"

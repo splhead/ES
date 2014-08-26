@@ -39,5 +39,9 @@ public class LicaoDBAdapter extends DBAdapter {
 		finally {
 			fechar();
 		}
-	}	
+	}
+	
+	private Licao licao() {
+		return null;
+	}
 }
