@@ -33,7 +33,7 @@ public class GridActivity extends ActionBarActivity {
 		//pega o tipo passado pela atividade principal
 		Intent intent = getIntent();
 		int tipo = intent.getIntExtra("tipo", 1); //padrao JOVEM
-		Log.d(getClass().getName(), String.valueOf(tipo));
+		//Log.d(getClass().getName(), String.valueOf(tipo));
 
 		final List<Trimestre> t = dba.buscaTodosTrimestres(tipo);
 		//startManagingCursor(c);

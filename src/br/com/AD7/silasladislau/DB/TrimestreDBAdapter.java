@@ -29,7 +29,7 @@ public class TrimestreDBAdapter extends DBAdapter {
 		if (this.trimestre(trimestre.getOrdemTrimestre(), trimestre.getAno(), trimestre.getTipo()) != null) {
 			Log.w(getClass().getName(),
 					"O trimestre já existe e não será gravado.");
-			return -1;
+			return trimestre.get_id();
 		}
 
 		ContentValues valores = new ContentValues();
@@ -47,7 +47,7 @@ public class TrimestreDBAdapter extends DBAdapter {
 	 * Grava trimestre no banco se não existir
 	 * 
 	 * @param trimestre
-	 * @return id ou -1 em caso não grave no bd
+	 * @return id ou null em caso não grave no bd
 	 */
 	public long addTrimestre(Trimestre trimestre) {
 		try {

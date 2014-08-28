@@ -13,27 +13,31 @@ public class DBHelper extends SQLiteOpenHelper {
 	// Declaracao do SQL de criacao do banco de dados
 	private static final String[] SQL_BANCO_DADOS = {
 			"CREATE TABLE IF NOT EXISTS trimestre ("
-					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-					+ "titulo TEXT NOT NULL, ordem_trimestre INTEGER NOT NULL,"
-					+ "ano INTEGER NOT NULL," + "tipo INTEGER NOT NULL,"
-					+ "capa BLOB NOT NULL"
+					+ TrimestreDBAdapter.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+					+ TrimestreDBAdapter.TITULO + " TEXT NOT NULL, ordem_trimestre INTEGER NOT NULL,"
+					+ TrimestreDBAdapter.ANO + " INTEGER NOT NULL,"
+					+ TrimestreDBAdapter.TIPO + " INTEGER NOT NULL,"
+					+ TrimestreDBAdapter.CAPA + " BLOB NOT NULL"
 					// "PRIMARY KEY(ordem_trimestre,ano)" +
 					+ ");",
 			"CREATE TABLE IF NOT EXISTS licao("
-					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-					+ "data_inicial INTEGER NOT NULL,"
-					+ "numero INTEGER  NOT NULL,"
-					+ "titulo TEXT NOT NULL,"					
-					+ "trimestre_id INTEGER NOT NULL,"
-					+ "capa BLOB NOT NULL,"
-					+ "FOREIGN KEY(trimestre_id) REFERENCES trimestre(_id)"
+					+ LicaoDBAdapter.ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+					+ LicaoDBAdapter.DATA + " TEXT NOT NULL,"
+					+ LicaoDBAdapter.NUMERO + " INTEGER  NOT NULL,"
+					+ LicaoDBAdapter.TITULO + " TEXT NOT NULL,"					
+					+ LicaoDBAdapter.TRIMESTREID + " INTEGER NOT NULL,"
+					+ LicaoDBAdapter.CAPA + " BLOB NOT NULL,"
+					+ "FOREIGN KEY(" + LicaoDBAdapter.TRIMESTREID 
+					+ ") REFERENCES trimestre(" + TrimestreDBAdapter.ROWID + ")"
 					+ ");",
 			"CREATE TABLE IF NOT EXISTS dia("
 					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-					+ "dia NUMERIC NOT NULL," + "titulo TEXT NOT NULL,"
+					+ "dia NUMERIC NOT NULL,"
+					+ "titulo TEXT NOT NULL,"
 					+ "texto TEXT NOT NULL,"
 					+ "licao_id INTEGER NOT NULL,"
-					+ "FOREIGN KEY(licao_id) REFERENCES licao(_id)"
+					+ "FOREIGN KEY(licao_id"
+					+ ") REFERENCES licao(_id)"
 					+ ");",
 			"CREATE TABLE IF NOT EXISTS resposta("
 					+ "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -76,6 +80,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		bancodados.execSQL("DROP TABLE IF EXISTS trimestre");
 		bancodados.execSQL("DROP TABLE IF EXISTS licao");
 		bancodados.execSQL("DROP TABLE IF EXISTS dia");
+		bancodados.execSQL("DROP TABLE IF EXISTS resposta");
 		onCreate(bancodados);
 	}
 

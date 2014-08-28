@@ -29,7 +29,7 @@ public class DBAdapter {
 		return this;
 	}
 	
-	public void fechar()
+	public void fechar() throws SQLException
 	{
 		Log.i(getClass().getName(), "Fechando conexão com banco de dados");
 		dbHelper.close();
