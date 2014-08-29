@@ -5,15 +5,22 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import android.app.Activity;
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
@@ -21,7 +28,7 @@ import android.os.Messenger;
 import android.util.Log;
 
 public class DownloadService extends IntentService {
-
+	private byte[] bytes;
 	private int result = Activity.RESULT_CANCELED;
 
 	public DownloadService() {
@@ -30,10 +37,18 @@ public class DownloadService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		Uri data = intent.getData();
+		Uri dados = intent.getData();
 		String urlPath = intent.getStringExtra("urlpath");
-		final DefaultHttpClient client = new DefaultHttpClient();
-		final HttpGet getRequest = new HttpGet(urlPath);
+		
+		final HttpGet requisicao = new HttpGet(urlPath);
+		final HttpParams httpParameters = new BasicHttpParams();
+        // Set the timeout in milliseconds until a connection is established.
+        HttpConnectionParams.setConnectionTimeout(httpParameters, 7000);
+
+        // Set the default socket timeout (SO_TIMEOUT)
+        // in milliseconds which is the timeout for waiting for data.
+        HttpConnectionParams.setSoTimeout(httpParameters, 10000);
+        final DefaultHttpClient cliente = new DefaultHttpClient(httpParameters);
 		// String fileName = data.getLastPathSegment();
 		/*
 		 * File output = new File(Environment.getExternalStorageDirectory(),
@@ -45,36 +60,37 @@ public class DownloadService extends IntentService {
 		 * 
 		 * if (arquivo.exists()) { arquivo.delete(); }
 		 */
-		String nomeArquivo = data.getLastPathSegment();
+		String nomeArquivo = dados.getLastPathSegment();
 		
-		FileOutputStream fos = null;
-		try {
-			HttpResponse response = client.execute(getRequest);
-			// check 200 OK for success
-			final int statusCode = response.getStatusLine().getStatusCode();
-
-			if (statusCode != HttpStatus.SC_OK) {
-				Log.w("Download", "Erro " + statusCode
-						+ " enquanto baixa a imagem " + urlPath);
-			}
-
-			final HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				InputStream in = null;
-				try {
-					// getting contents from the stream
-					in = entity.getContent();
-					byte[] bytes = leBytes(in);
-					fos = openFileOutput(nomeArquivo, MODE_PRIVATE);
-					fos.write(bytes);
-				} finally {
-					entity.consumeContent();
-					if(fos != null){
-						fos.close();
+		//FileOutputStream fos = null;
+		try {			
+			if (internetDisponivel(getBaseContext())) {
+				HttpResponse resposta = cliente.execute(requisicao);
+				// check 200 OK for success
+				final int codigoStatus = resposta.getStatusLine()
+						.getStatusCode();
+				if (codigoStatus != HttpStatus.SC_OK) {
+					Log.w("Download", "Erro " + codigoStatus + " ao baixar "
+							+ urlPath);
+				}
+				final HttpEntity entidade = resposta.getEntity();
+				if (entidade != null) {
+					InputStream in = null;
+					try {
+						// getting contents from the stream
+						in = entidade.getContent();
+						bytes = leBytes(in);
+						//fos = openFileOutput(nomeArquivo, MODE_PRIVATE);
+						//fos.write(bytes);
+					} finally {
+						entidade.consumeContent();
+						/*if(fos != null){
+							fos.close();
+						}*/
 					}
-				}				
-				// Sucessful finished
-				result = Activity.RESULT_OK;
+					// Sucessful finished
+					result = Activity.RESULT_OK;
+				}
 			}
 
 		} catch (Exception e) {
@@ -86,6 +102,7 @@ public class DownloadService extends IntentService {
 			Messenger messenger = (Messenger) extras.get("MESSENGER");
 			Message msg = Message.obtain();
 			msg.arg1 = result;
+			//msg.obj = bytes;
 			msg.obj = new File(nomeArquivo).getAbsolutePath();
 			try {
 				messenger.send(msg);
@@ -94,6 +111,33 @@ public class DownloadService extends IntentService {
 			}
 
 		}
+	}
+	
+	/**
+	 * Verifica se há uma conexão disponível.
+	 * 
+	 * @param con
+	 *            - Contexto
+	 * @return True se estiver conectado ou False se não.
+	 */
+	public Boolean internetDisponivel(Context con) {
+
+		try {
+			ConnectivityManager connectivityManager = (ConnectivityManager) con
+					.getSystemService(Context.CONNECTIVITY_SERVICE);
+			NetworkInfo wifiInfo = connectivityManager
+					.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+			NetworkInfo mobileInfo = connectivityManager
+					.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+			if (wifiInfo.isConnected() || mobileInfo.isConnected()) {
+				Log.d("TestaInternet", "Está conectado.");
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Log.d("TestaInternet", "Não está conectado.");
+		return false;
 	}
 
 	/*
