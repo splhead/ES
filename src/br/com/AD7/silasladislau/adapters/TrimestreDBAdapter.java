@@ -1,9 +1,9 @@
-package br.com.AD7.silasladislau.DB;
+package br.com.AD7.silasladislau.adapters;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.AD7.silasladislau.Trimestre;
+import br.com.AD7.silasladislau.models.Trimestre;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;

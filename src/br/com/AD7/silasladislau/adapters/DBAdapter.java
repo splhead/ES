@@ -1,5 +1,6 @@
-package br.com.AD7.silasladislau.DB;
+package br.com.AD7.silasladislau.adapters;
 
+import br.com.AD7.silasladislau.helpers.DBHelper;
 import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;

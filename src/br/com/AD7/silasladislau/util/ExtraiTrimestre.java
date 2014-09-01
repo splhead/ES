@@ -1,22 +1,22 @@
-package br.com.AD7.silasladislau.IO;
+package br.com.AD7.silasladislau.util;
 
-import java.io.ByteArrayOutputStream;
 import java.util.StringTokenizer;
 
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.util.Log;
-import br.com.AD7.silasladislau.Extracao;
-import br.com.AD7.silasladislau.Trimestre;
-import br.com.AD7.silasladislau.Principal.LicaoTask;
+import br.com.AD7.silasladislau.interfaces.TarefaConcluidaListener;
+import br.com.AD7.silasladislau.models.Extracao;
+import br.com.AD7.silasladislau.models.Trimestre;
 
 public class ExtraiTrimestre extends Extracao implements TarefaConcluidaListener {
 	private Trimestre trimestre;
+	//private String url;
 	
+	public ExtraiTrimestre() {
+		new DocumentDownloadTask().execute(params);
+	}
 
 	public Trimestre getTrimestre() {
 		return trimestre;
@@ -35,7 +35,7 @@ public class ExtraiTrimestre extends Extracao implements TarefaConcluidaListener
 			for (int i = 0; i < trimestres.size(); i++) {
 									
 				String tmp = trimestres.get(i).text().replace('/', ' ');
-//					Log.d("trimestre", trimestres.get(i).text());
+					Log.d("trimestre", trimestres.get(i).text());
 				StringTokenizer tokens = new StringTokenizer(tmp);
 				// 1¤ Trimestre de 2011 A Bíblia e as emoções humanas
 				// pega apenas o primeiro char de 4¤ e converte para int
@@ -110,7 +110,8 @@ public class ExtraiTrimestre extends Extracao implements TarefaConcluidaListener
 				// String ano_tmp = formatador.format(gc.getTime());
 
 				
-
+				trimestre.setTitulo(titulo.toString());
+				Log.d("trim", trimestre.toString());
 				// limpa a StringBuilder para o proximo titulo
 				titulo.delete(0, titulo.length());
 				// limpa a variavel
@@ -132,8 +133,7 @@ public class ExtraiTrimestre extends Extracao implements TarefaConcluidaListener
 
 	@Override
 	public void quandoTarefaConcluida(Document html) {
-		// TODO Auto-generated method stub
-		
+		this.iniciaExtracao(html);		
 	}
 
 }

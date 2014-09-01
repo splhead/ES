@@ -1,4 +1,4 @@
-package br.com.AD7.silasladislau;
+package br.com.AD7.silasladislau.activity;
 
 import java.util.List;
 
@@ -19,7 +19,9 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
+import br.com.AD7.silasladislau.R;
+import br.com.AD7.silasladislau.adapters.TrimestreDBAdapter;
+import br.com.AD7.silasladislau.models.Trimestre;
 
 public class GridActivity extends ActionBarActivity {
 	// private List<Trimestre> trimestres = null;

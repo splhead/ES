@@ -1,8 +1,9 @@
-package br.com.AD7.silasladislau.IO;
+package br.com.AD7.silasladislau.util;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import br.com.AD7.silasladislau.Extracao;
+import br.com.AD7.silasladislau.interfaces.TarefaConcluidaListener;
+import br.com.AD7.silasladislau.models.Extracao;
 import android.os.AsyncTask;
 import android.util.Log;
 

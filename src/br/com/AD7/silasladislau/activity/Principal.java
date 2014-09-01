@@ -1,52 +1,48 @@
-package br.com.AD7.silasladislau;
+package br.com.AD7.silasladislau.activity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-import br.com.AD7.silasladislau.DB.TrimestreDBAdapter;
-import br.com.AD7.silasladislau.IO.Util;
+import br.com.AD7.silasladislau.R;
+import br.com.AD7.silasladislau.adapters.LicaoDBAdapter;
+import br.com.AD7.silasladislau.adapters.TrimestreDBAdapter;
+import br.com.AD7.silasladislau.models.Licao;
 //import android.graphics.Bitmap;
 //import android.graphics.BitmapFactory;
+import br.com.AD7.silasladislau.models.Trimestre;
+import br.com.AD7.silasladislau.util.Util;
 
 @SuppressLint("HandlerLeak")
 public class Principal extends ActionBarActivity {
-	private TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
 	private String capa, tmp;
+	private TrimestreDBAdapter dbaTrimestre = new TrimestreDBAdapter(this);
+	private LicaoDBAdapter dbaLicao = new LicaoDBAdapter(this);
+	private long trimestreID;
 	private static final int ADULTO = 0, JOVEM = 1;
-	private int ordem_trimestre, ano = 2014, tipo = ADULTO; // ano e tipo para
+	private static final boolean DEVELOPER_MODE = true;
+	private int ordem_trimestre, ano = 2014, tipo = JOVEM; // ano e tipo para
 															// teste !!!!
 															// remover!!!
 	private Object path;
@@ -71,14 +67,29 @@ public class Principal extends ActionBarActivity {
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		if (DEVELOPER_MODE) {
+	         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+	                 .detectDiskReads()
+	                 .detectDiskWrites()
+	                 .detectNetwork()   // or .detectAll() for all detectable problems
+	                 .penaltyLog()
+	                 .build());
+	         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+	                 .detectLeakedSqlLiteObjects()
+	                 .detectLeakedClosableObjects()
+	                 .penaltyLog()
+	                 .penaltyDeath()
+	                 .build());
+	     }
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		//setContentView(R.layout.activity_grid_trim);
-		obtemTrimestres(tipo, ano);
+		new TrimestreTask().execute(tipo, ano);
+		/*obtemTrimestres(tipo, ano);
 		
 		Intent intent = new Intent(getApplicationContext(), GridActivity.class);
 		intent.putExtra("tipo", tipo);
-		startActivity(intent);
+		startActivity(intent);*/
 		
 
 		// if (new Util().internetDisponivel(this)) {
@@ -120,7 +131,7 @@ public class Principal extends ActionBarActivity {
 		switch (item.getItemId()) {
 		case R.id.action_refresh:
 			// atualizaTrimestres(tipo, ano);
-			new docTask().execute(new Integer [] {tipo, ano});
+			new TrimestreTask().execute(new Integer [] {tipo, ano});
 			return true;
 
 		default:
@@ -153,7 +164,7 @@ public class Principal extends ActionBarActivity {
 
 	}
 
-	private class docTask extends AsyncTask<Integer, Void, Document> {
+	private class TrimestreTask extends AsyncTask<Integer, Void, Document> {
 
 		@Override
 		protected Document doInBackground(Integer... params) {
@@ -161,14 +172,10 @@ public class Principal extends ActionBarActivity {
 			return obtemHtml(url);
 
 		}
-		
-	}
-	
-	
-	public void obtemTrimestres(int tipo, int ano) {
-		Document html;
-		try {
-			html = new docTask().execute(tipo,ano).get();
+
+		@Override
+		protected void onPostExecute(Document html) {
+			//html = new docTask().execute(tipo,ano).get();
 			if (html != null) {
 				// pegando do #conteudo por haver erro de sintaxe no html do
 				// #trimestre
@@ -177,10 +184,9 @@ public class Principal extends ActionBarActivity {
 				Elements capas = buscaElementos(html, "#trimestres img");
 
 				for (int i = 0; i < trimestres.size(); i++) {
-					// TODO pegar urls de cada lição referente a cada trimestre
-					
+										
 					tmp = trimestres.get(i).text().replace('/', ' ');
-//					Log.d("trimestre", trimestres.get(i).text());
+//						Log.d("trimestre", trimestres.get(i).text());
 					StringTokenizer tokens = new StringTokenizer(tmp);
 					// 1¤ Trimestre de 2011 A Bíblia e as emoções humanas
 					// pega apenas o primeiro char de 4¤ e converte para int
@@ -227,8 +233,10 @@ public class Principal extends ActionBarActivity {
 						
 						Trimestre trimestre = new Trimestre(titulo.toString(),
 								ordem_trimestre, ano, tipo, baos.toByteArray());
+						
+						
 
-						dba.addTrimestre(trimestre);
+						trimestreID = dbaTrimestre.addTrimestre(trimestre);
 
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -271,26 +279,194 @@ public class Principal extends ActionBarActivity {
 					}
 				}
 			}
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (ExecutionException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
 		
 	}
-	public class LicaoTask extends AsyncTask<String, Void, Void> {
+	
+	
+	/*public void obtemTrimestres(int tipo, int ano) {
+		Document html;
+		try {
+			//html = new docTask().execute(tipo,ano).get();
+			if (html != null) {
+				// pegando do #conteudo por haver erro de sintaxe no html do
+				// #trimestre
+				Elements trimestres = buscaElementos(html,
+						"#trimestres p:matches([t|T]rimestre+)");
+				Elements capas = buscaElementos(html, "#trimestres img");
+
+				for (int i = 0; i < trimestres.size(); i++) {
+										
+					tmp = trimestres.get(i).text().replace('/', ' ');
+//					Log.d("trimestre", trimestres.get(i).text());
+					StringTokenizer tokens = new StringTokenizer(tmp);
+					// 1¤ Trimestre de 2011 A Bíblia e as emoções humanas
+					// pega apenas o primeiro char de 4¤ e converte para int
+					ordem_trimestre = Integer.parseInt(Character
+							.toString(tokens.nextToken().charAt(0)));
+					tokens.nextToken(); // pula a palavra Trimestre
+					tokens.nextToken(); // pula o "de"
+					ano = Integer.parseInt(tokens.nextToken()); // pula o "2011"
+					// junta todas as palavras que formam o título do trimestre.
+					
+					//correção do problema
+					//<p>3º trimestre de 2014</p>
+					//<p>Ensinos de Jesus</p>
+					if (tokens.hasMoreTokens()) {
+						while (tokens.hasMoreTokens()) {
+							titulo.append(tokens.nextToken() + " ");
+						}
+					} else if (trimestres.get(i).nextElementSibling().hasText()) {
+						titulo.append(trimestres.get(i).nextElementSibling().text());
+					}
+								
+					
+					// Log.d("trimestre", String.valueOf(ordem_trimestre));
+					//Log.d("trimestre", titulo.toString());
+					// obtem o endereço absoluto da imagem no site
+					capa = capas.get(i).attr("abs:src");
+
+					// baixa a imagem em outro processo
+					// byte[] imagemFile = getFile(capa);
+					//ImageView image = (ImageView) findViewById(R.id.imageView);
+					// image.setImageBitmap(getFile(capa));
+					// Bitmap bitmap =
+					// BitmapFactory.decodeByteArray(imagemFile,0,imagemFile.length);
+					//Bitmap bitmap = null;
+					try {
+						Bitmap bitmap = new baixaImagemTask().execute(capa).get();//new Util().baixaImagem(capa);
+						//image.setImageBitmap(bitmap);
+						if (bitmap == null) {
+							Log.d("capa", "vazio");
+						}
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						// comprime a imagem para gravar no banco
+						bitmap.compress(CompressFormat.PNG, 100, baos);
+						
+						Trimestre trimestre = new Trimestre(titulo.toString(),
+								ordem_trimestre, ano, tipo, baos.toByteArray());
+						
+						TrimestreDBAdapter dba = new TrimestreDBAdapter(this);
+
+						trimestreID = dba.addTrimestre(trimestre);
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+
+					
+					 * Intent intent = new Intent(this, DownloadService.class);
+					 * Messenger messenger = new Messenger(handler);
+					 * intent.putExtra("MESSENGER", messenger);
+					 * intent.setData(Uri.parse(capa));
+					 * intent.putExtra("urlpath", capa); startService(intent);
+					 
+
+					// pega o nome original da imagem da capa
+					// capa = capa.substring(capa.lastIndexOf("/") + 1);
+					// Log.d("capa", capa);
+					// GregorianCalendar gc=new GregorianCalendar();
+					// gc.set(Integer.parseInt(ano), 0, 1);
+					// SimpleDateFormat formatador = new
+					// SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					// String ano_tmp = formatador.format(gc.getTime());
+
+					
+
+					// limpa a StringBuilder para o proximo titulo
+					titulo.delete(0, titulo.length());
+					// limpa a variavel
+					capa = null;
+					
+					//pega o link das lições do trimestre
+					int nLicao = 1;
+					Elements linkLicoes = buscaElementos(html,
+							"div#conteudo a[href~="+ ordem_trimestre + ano +"]");
+					for (Element link : linkLicoes) {
+						Log.d("oT link licao", link.attr("abs:href") + " - " 
+								+ String.valueOf(nLicao) + " " + link.text());
+						nLicao++;
+						new LicaoTask().execute(link.attr("abs:href"));
+					}
+				}
+			}
+		} catch (InterruptedException e1) {			
+			e1.printStackTrace();
+		} catch (ExecutionException e1) {			
+			e1.printStackTrace();
+		}
+		
+	}*/
+	public class LicaoTask extends AsyncTask<String, Void, Document> {
 
 		@Override
-		protected Void doInBackground(String... urls) {
-			obtemLicao(urls[0]);
-			return null;
+		protected Document doInBackground(String... urls) {
+			
+			return obtemHtml(urls[0]);
+		}
+
+		@Override
+		protected void onPostExecute(Document html) {
+			Element titulo = buscaElemento(html,
+					"div#conteudo td:matches((?i)lição\\ \\d)");
+			String sTitulo = titulo.text();
+			Log.d("obtemLicao", "título: " + sTitulo);
+			StringTokenizer tokens = new StringTokenizer(sTitulo);
+			tokens.nextToken();//pula Lição
+			int iNumero = Integer.parseInt(tokens.nextToken());
+			Log.d("obtemLicao", "número: " + iNumero);
+
+			Element data_inicial_final = buscaElemento(html,
+					"div#conteudo td p:matches(\\d*\\ a\\ \\d*");
+			String sData = data_inicial_final.text();
+			Log.d("obtemLicao", "data: " + sData);
+
+			Element ilustracao = buscaElemento(html,
+					"div#conteudo p[align=center] img");
+			/*Uri urlIlustração = Uri.parse(ilustracao.attr("abs:src"));
+			String nomeArquivoIlustracao = urlIlustração.getLastPathSegment();
+			Log.d("obtemLicao", urlIlustração.toString() + " "
+					+ nomeArquivoIlustracao);*/
+			String sCapa = ilustracao.attr("abs:src");
+			
+			Bitmap bitmap;
+			try {
+				bitmap = new baixaImagemTask().execute(sCapa).get();
+				if (bitmap == null) {
+					Log.d("capa", "vazio");
+				}
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				// comprime a imagem para gravar no banco
+				bitmap.compress(CompressFormat.PNG, 100, baos);
+				byte[] capa = baos.toByteArray();
+				
+				Licao licao = new Licao(sData, iNumero, sTitulo, trimestreID, capa);
+				
+				
+				
+				dbaLicao.addLicao(licao);
+				/*
+				 * Element raiz = buscaElemento(html, "div#conteudo");
+				 * getDia(html, raiz, "Sábado"); getDia(html, raiz, "Domingo");
+				 * getDia(html, raiz, "Segunda"); getDia(html, raiz, "Terça");
+				 * getDia(html, raiz, "Quarta"); getDia(html, raiz, "Quinta");
+				 * getDia(html, raiz, "Sexta");
+				 */
+				
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//new Util().baixaImagem(capa);//image.setImageBitmap(bitmap);
+								
 		}
 		
 	}
 
-	private void obtemLicao(String url) {
+	/*private void obtemLicao(String url) {
 		//String url = "http://cpbmais.cpb.com.br/htdocs/periodicos/licoes/jovens/2014/lj632014.html";
 		Document html = obtemHtml(url);
 		// File in = new File(this.getFilesDir() + "/lj532014.html");
@@ -298,13 +474,20 @@ public class Principal extends ActionBarActivity {
 		// Document html;
 		try {
 			// html = Jsoup.parse(in, "UTF-8");
-			Element h1s = buscaElemento(html,
+			
+			Element titulo = buscaElemento(html,
 					"div#conteudo td:matches((?i)lição\\ \\d)");
-			Log.d("obtemLicao", "título: " + h1s.text());
+			String sTitulo = titulo.text();
+			Log.d("obtemLicao", "título: " + sTitulo);
+			StringTokenizer tokens = new StringTokenizer(sTitulo);
+			tokens.nextToken();//pula Lição
+			int iNumero = Integer.parseInt(tokens.nextToken());
+			Log.d("obtemLicao", "número: " + iNumero);
 
 			Element data_inicial_final = buscaElemento(html,
 					"div#conteudo td p:matches(\\d*\\ a\\ \\d*");
-			Log.d("obtemLicao", "data: " + data_inicial_final.text());
+			String sData = data_inicial_final.text();
+			Log.d("obtemLicao", "data: " + sData);
 
 			Element ilustracao = buscaElemento(html,
 					"div#conteudo p[align=center] img");
@@ -312,6 +495,24 @@ public class Principal extends ActionBarActivity {
 			String nomeArquivoIlustracao = urlIlustração.getLastPathSegment();
 			Log.d("obtemLicao", urlIlustração.toString() + " "
 					+ nomeArquivoIlustracao);
+			String sCapa = ilustracao.attr("abs:src");
+			
+			Bitmap bitmap = new baixaImagemTask().execute(sCapa).get();//new Util().baixaImagem(capa);
+			//image.setImageBitmap(bitmap);
+			if (bitmap == null) {
+				Log.d("capa", "vazio");
+			}
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			// comprime a imagem para gravar no banco
+			bitmap.compress(CompressFormat.PNG, 100, baos);
+			byte[] capa = baos.toByteArray();
+			
+			Licao licao = new Licao(sData, iNumero, sTitulo, trimestreID, capa);
+			
+			LicaoDBAdapter dbaLicao = new LicaoDBAdapter(this);
+			
+			dbaLicao.addLicao(licao);		
+			
 
 			Element raiz = buscaElemento(html, "div#conteudo");
 			getDia(html, raiz, "Sábado");
@@ -327,7 +528,7 @@ public class Principal extends ActionBarActivity {
 			this.finish();
 			System.exit(1);
 		}
-	}
+	}*/
 
 	/*
 	 * pega o texto do dia
@@ -391,7 +592,7 @@ public class Principal extends ActionBarActivity {
 			Log.d("obtemHTML", "Abrindo " + url);
 
 			return doc;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// Toast.makeText(this, "Erro:" + e.getMessage(),
 			// Toast.LENGTH_SHORT)
 			// .show();

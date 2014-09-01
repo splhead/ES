@@ -1,4 +1,4 @@
-package br.com.AD7.silasladislau;
+package br.com.AD7.silasladislau.models;
 
 
 public class Trimestre {

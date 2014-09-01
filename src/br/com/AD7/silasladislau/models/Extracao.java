@@ -1,4 +1,4 @@
-package br.com.AD7.silasladislau;
+package br.com.AD7.silasladislau.models;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

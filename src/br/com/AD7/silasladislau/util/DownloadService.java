@@ -1,4 +1,4 @@
-package br.com.AD7.silasladislau.IO;
+package br.com.AD7.silasladislau.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

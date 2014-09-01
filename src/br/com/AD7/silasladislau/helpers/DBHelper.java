@@ -1,5 +1,7 @@
-package br.com.AD7.silasladislau.DB;
+package br.com.AD7.silasladislau.helpers;
 
+import br.com.AD7.silasladislau.adapters.LicaoDBAdapter;
+import br.com.AD7.silasladislau.adapters.TrimestreDBAdapter;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
