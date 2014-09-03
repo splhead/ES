@@ -49,7 +49,7 @@ public class LoginActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
-		new LoginTask().execute("");
+		new CaptchaTask().execute("");
 		final Button button = (Button) findViewById(R.id.bEntrar);
 		button.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -57,7 +57,7 @@ public class LoginActivity extends ActionBarActivity {
 				recaptchaResponseField = etCaptcha.getText().toString();
 				Log.d("cliquei", recaptchaResponseField);
 
-				login2();
+				new LoginTask().execute("");
 
 			}
 		});
@@ -82,20 +82,22 @@ public class LoginActivity extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	class LoginTask extends AsyncTask<String, Void, Bitmap> {
+	class CaptchaTask extends AsyncTask<String, Void, Bitmap> {
 
 		@Override
 		protected Bitmap doInBackground(String... arg0) {
 			recaptcha();
 			return null;
 		}
+	}
+	
+	class LoginTask extends AsyncTask<String, Void, Void> {
 
-		/*
-		 * @Override protected void onPostExecute(Bitmap img) { if (img != null)
-		 * { ImageView ivCaptcha = (ImageView) findViewById(R.id.ivCaptcha);
-		 * ivCaptcha.setImageBitmap(img); } }
-		 */
-
+		@Override
+		protected Void doInBackground(String... arg0) {
+			login2();
+			return null;
+		}
 	}
 
 	public void login() throws ClientProtocolException, IOException {
