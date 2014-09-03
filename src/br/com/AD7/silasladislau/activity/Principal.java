@@ -68,7 +68,7 @@ public class Principal extends ActionBarActivity {
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		if (DEVELOPER_MODE) {
+		/*if (DEVELOPER_MODE) {
 	         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
 	                 .detectDiskReads()
 	                 .detectDiskWrites()
@@ -81,7 +81,7 @@ public class Principal extends ActionBarActivity {
 	                 .penaltyLog()
 	                 .penaltyDeath()
 	                 .build());
-	     }
+	     }*/
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		//setContentView(R.layout.activity_grid_trim);

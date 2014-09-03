@@ -39,6 +39,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 public class LoginActivity extends ActionBarActivity {
+	public static final String PREFS_NAME = "LoginPrefs";
 	final String EMAIL = "silas_ladislau@yahoo.com.br";
 	final String SENHA = "spl#e@d";
 	String recaptchaChallengeField = "";
@@ -188,7 +189,7 @@ public class LoginActivity extends ActionBarActivity {
 			recaptchaChallengeField = desafio.attr("value");
 			// String sessionId = res.cookie("PHPSESSID");+ sessionId
 
-			Log.d("login2", doc.html() + " ");
+			//Log.d("login2", doc.html() + " ");
 			Log.d("login2", imagem.attr("abs:src") + " "
 					+ recaptchaChallengeField);
 			new baixaImagemTask().execute(imagem.attr("abs:src"));
@@ -201,6 +202,17 @@ public class LoginActivity extends ActionBarActivity {
 	private void login2() {
 		Connection.Response res;
 		try {
+			//para pegar o cookie
+			res = Jsoup
+					.connect(
+							"http://cpbmais.cpb.com.br/login/index.php")
+					.userAgent(
+							"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:32.0) Gecko/20100101 Firefox/32.0")
+					// .data("email", EMAIL, "senha", SENHA)
+					// .method(Method.POST)
+					.execute();
+			 String sessionId = res.cookie("PHPSESSID");
+			 Log.d("cookie", sessionId);
 			// abre o captch
 			res = Jsoup
 					.connect(
@@ -211,13 +223,20 @@ public class LoginActivity extends ActionBarActivity {
 							"recaptcha_challenge_field",
 							recaptchaChallengeField,
 							"recaptcha_response_field", recaptchaResponseField)
-					// .method(Method.POST)
+					.method(Method.POST)
+					.cookie("PHPSESSID", sessionId)
 					.execute();
 			Document doc = res.parse();
 
-			// String sessionId = res.cookie("PHPSESSID");+ sessionId
+			
 
 			Log.d("login2", doc.html() + " ");
+			
+			res = Jsoup.connect("http://cpbmais.cpb.com.br/htdocs/periodicos/lesjovens2014.php")
+					.cookie("PHPSESSID", sessionId)
+					.execute();
+			doc = res.parse();
+			Log.d("logado-request", doc.html() + " ");
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
