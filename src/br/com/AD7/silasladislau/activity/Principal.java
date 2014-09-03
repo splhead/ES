@@ -11,6 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.os.AsyncTask;
@@ -84,14 +85,14 @@ public class Principal extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		//setContentView(R.layout.activity_grid_trim);
-		new TrimestreTask().execute(tipo, ano);
+		//new TrimestreTask().execute(tipo, ano);
 		/*obtemTrimestres(tipo, ano);
 		
 		Intent intent = new Intent(getApplicationContext(), GridActivity.class);
 		intent.putExtra("tipo", tipo);
 		startActivity(intent);*/
-		
-
+		Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+		startActivity(intent);
 		// if (new Util().internetDisponivel(this)) {
 		
 		/*

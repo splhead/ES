@@ -1,6 +1,5 @@
 package br.com.AD7.silasladislau.util;
 
-import java.io.BufferedInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,6 +97,7 @@ public class Util {
 			Log.e("baixaImagem", "Erro: " + e.toString() +
 					" ao baixar imagem de " + url);
 		}
+		Log.e("baixaImagem", "Erro: ao baixar imagem de " + url);
 		return null;
 	}
 	

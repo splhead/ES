@@ -28,12 +28,17 @@
             </intent-filter>
         </activity>
 
-        <service android:name="br.com.AD7.silasladislau.util.DownloadService" >
+        <service android:name=".util.DownloadService" >
         </service>
-        
+
         <activity
             android:name=".activity.GridActivity"
             android:label="@string/app_name"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+        </activity>
+        <activity
+            android:name="br.com.AD7.silasladislau.activity.LoginActivity"
+            android:label="@string/title_activity_login"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
         </activity>
     </application>

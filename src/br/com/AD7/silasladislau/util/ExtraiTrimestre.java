@@ -15,7 +15,7 @@ public class ExtraiTrimestre extends Extracao implements TarefaConcluidaListener
 	//private String url;
 	
 	public ExtraiTrimestre() {
-		new DocumentDownloadTask().execute(params);
+	//	new DocumentDownloadTask().execute(params);
 	}
 
 	public Trimestre getTrimestre() {

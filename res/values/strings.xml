@@ -10,5 +10,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_grid">GridActivity</string>
+    <string name="title_activity_login">Entrar</string>
 
 </resources>
